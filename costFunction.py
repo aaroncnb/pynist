@@ -37,40 +37,40 @@ class PyNist(object):
 
 
 
-    def costFunction(X, y,theta, lam=None, reg=False):
-        m = len(y)
+    # def costFunction(X, y,theta, lam=None, reg=False):
+    #     m = len(y)
+    #
+    #     grad = np.zeros(np.size(theta))
+    #
+    #     h = sigmoid(X*theta)
+    #
+    #     # without regularization:
+    #     if reg==False:
+    #         J = (1/m)*np.sum(-y*(h)-(1-y)*(1-h))
+    #         grad = (1/m) * np.T(X)*(h-y)
+    #         return J, grad
+    #
+    #     # with regularization:
+    #     elif reg==True:
+    #             J = J + (lam/(2.0*m))*np.sum(theta[1:]**2)
+    #             grad[1:] = grad[1:]+(lam/m)*(theta[1:])
+    #             return J,grad
+    #
+    #     else:
+    #         print "reg should be set to True or False to turn regularization on or off"
+    #         pass
 
-        grad = np.zeros(np.size(theta))
-
-        h = sigmoid(X*theta)
-
-        # without regularization:
-        if reg==False:
-            J = (1/m)*np.sum(-y*np.log(h)-(1-y)*log(1-h))
-            grad = (1/m) * np.T(X)*(h-y)
-            return J, grad
-
-        # with regularization:
-        elif reg==True:
-                J = J + (lam/(2.0*m))*np.sum(theta[1:]**2)
-                grad[1:] = grad[1:]+(lam/m)*(theta[1:])
-                return J,grad
-
-        else:
-            print "reg should be set to True or False to turn regularization on or off"
-            pass
 
 
-    def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
-
+    def forwardProp(X, y,theta1, theta2):
         m = np.size(y)
+
+        # Map labels to binary label vectors
         y_temp    = np.arange(1,11,1)
         y_broad   = np.ones([10,np.size(y)])
         y_boolmap = np.array(y*y_broad.T==y_temp, dtype=int)
 
         y = y_boolmap.copy()
-        #y_boolmap.shape()
-
 
         a1 = np.insert(X,0,1, axis=1)
 
@@ -78,19 +78,25 @@ class PyNist(object):
             sigmoid(theta1.dot(a1.T)),
                         0,1, axis=0)
 
-        a3 = sigmoid(theta2.dot(a2))
+        return sigmoid(theta2.dot(a2))
 
-        h = a3
+    def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
 
+        h = forwardProp(X, y, theta1, theta2)
 
         # without regularization:
         if reg==False:
             J = np.sum(
-                -np.log(h).dot(y)-np.log(1-h).dot(1-y)
-                                            )/m
-            grad = np.matmul(X.T,(h.T-y))/m
+                -(np.log(h).dot(y))-(np.log(1-h).dot(1-y))
+                                            ) /m
+
+            # J = np.sum(
+            #     -(h.dot(y))-((1-h).dot(1-y))
+            #                                 )/m
+            # grad = np.matmul(X.T,(h.T-y))/m
+
             print J
-            return J, grad, h, a2, a1, m, y
+            return J, grad
 
 
         # with regularization:
@@ -103,9 +109,8 @@ class PyNist(object):
             print "reg should be set to True or False to turn regularization on or off"
             pass
 
-np.log(h).dot(y)
 
-J, grad, h, a2, a1, m, y_map = costFunctionNe(X,y,theta1, theta2)
+J, grad = costFunctionNe(X,y,theta1, theta2)
 
-
+np.log(np.e)
 y_map.shape
