@@ -27,11 +27,7 @@ def sigmoid(z):
 
 def sigmoidGrad(z):
 
-    g_ = 0
-
-    g_ = sigmoid(z)*(1-sigmoid(g))
-
-    return g_
+    return sigmoid(z)*(1-sigmoid(g))
 
 
 
