@@ -1,116 +1,96 @@
 import numpy as np
 
-class PyNist(object):
-    """A simple feed-forward NN mnist application"""
-    def __init__(self, arg):
-        super(, self).__init__()
-        self.arg = arg
 
-    def loadTestData():
+def loadTestData():
 
-        from scipy.io import matlab
+    from scipy.io import matlab
 
-        testPath    = '/home/aaronb/Downloads/Coursera/machinelearning/machine-learning-ex4/ex4/'
-        dataFile    = testPath + 'ex4data1.mat'
-        weightsFile = testPath + 'ex4weights.mat'
+    testPath    = '/home/aaronb/Downloads/Coursera/machinelearning/machine-learning-ex4/ex4/'
+    dataFile    = testPath + 'ex4data1.mat'
+    weightsFile = testPath + 'ex4weights.mat'
 
-        data    = matlab.loadmat(dataFile)
-        weights = matlab.loadmat(weightsFile)
+    data    = matlab.loadmat(dataFile)
+    weights = matlab.loadmat(weightsFile)
 
-        y = data['y']
-        X = data['X']
+    y = data['y']
+    X = data['X']
 
-        theta1 = weights['Theta1']
-        theta2 = weights['Theta2']
+    theta1 = weights['Theta1']
+    theta2 = weights['Theta2']
 
-        return X, y, theta1, theta2
+    return X, y, theta1, theta2
 
-    X, y, theta1, theta2 = loadTestData()
+X, y, theta1, theta2 = loadTestData()
 
-    def sigmoid(z):
+def sigmoid(z):
 
-        return 1 / (1 + np.exp(-z))
+    return 1 / (1 + np.exp(-z))
 
-    def sigmoidGrad(z):
+def sigmoidGrad(z):
 
-        return sigmoid(z)*(1-sigmoid(g))
+    return sigmoid(z)*(1-sigmoid(g))
+
+def binaryMapper(y):
+
+    m = np.size(y)
+
+    # Map labels to binary label vectors
+    y_temp    = np.arange(1,11,1)
+    y_broad   = np.ones([10,np.size(y)])
+
+    return np.array(y*y_broad.T==y_temp, dtype=int)
 
 
-
-    # def costFunction(X, y,theta, lam=None, reg=False):
-    #     m = len(y)
-    #
-    #     grad = np.zeros(np.size(theta))
-    #
-    #     h = sigmoid(X*theta)
-    #
-    #     # without regularization:
-    #     if reg==False:
-    #         J = (1/m)*np.sum(-y*(h)-(1-y)*(1-h))
-    #         grad = (1/m) * np.T(X)*(h-y)
-    #         return J, grad
-    #
-    #     # with regularization:
-    #     elif reg==True:
-    #             J = J + (lam/(2.0*m))*np.sum(theta[1:]**2)
-    #             grad[1:] = grad[1:]+(lam/m)*(theta[1:])
-    #             return J,grad
-    #
-    #     else:
-    #         print "reg should be set to True or False to turn regularization on or off"
-    #         pass
+def forwardProp(X,theta1, theta2):
 
 
 
-    def forwardProp(X, y,theta1, theta2):
-        m = np.size(y)
+    a1 = np.insert(X,0,1, axis=1)
 
-        # Map labels to binary label vectors
-        y_temp    = np.arange(1,11,1)
-        y_broad   = np.ones([10,np.size(y)])
-        y_boolmap = np.array(y*y_broad.T==y_temp, dtype=int)
+    a2 = np.insert(
+        sigmoid(theta1.dot(a1.T)),
+                    0,1, axis=0)
 
-        y = y_boolmap.copy()
+    return sigmoid(theta2.dot(a2))
 
-        a1 = np.insert(X,0,1, axis=1)
+def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
+    # Get the number of training examples:
+    m = np.size(y)
+    # Map labels to binary vectors:
+    y = binaryMapper(y).T
+    # Feed it forward:
+    h = forwardProp(X, theta1, theta2)
 
-        a2 = np.insert(
-            sigmoid(theta1.dot(a1.T)),
-                        0,1, axis=0)
+    # Get the cost without regularization:
+    if reg==False:
 
-        return sigmoid(theta2.dot(a2))
+        J = np.sum(
+            -(np.log(h)*y)-(np.log(1-h)*(1-y))
+                                        ) /m
 
-    def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
+        print J
+        return J, grad
 
-        h = forwardProp(X, y, theta1, theta2)
+    # with regularization:
+    elif reg==True:
+        J = J + (lam/(2.0*m))*np.sum(theta[1:]**2)
+        grad[1:] = grad[1:]+(lam/m)*(theta[1:])
+        return J, grad, h, a2, a1, m, y
 
-        # without regularization:
-        if reg==False:
-            J = np.sum(
-                -(np.log(h).dot(y))-(np.log(1-h).dot(1-y))
-                                            ) /m
-
-            # J = np.sum(
-            #     -(h.dot(y))-((1-h).dot(1-y))
-            #                                 )/m
-            # grad = np.matmul(X.T,(h.T-y))/m
-
-            print J
-            return J, grad
-
-
-        # with regularization:
-        elif reg==True:
-                J = J + (lam/(2.0*m))*np.sum(theta[1:]**2)
-                grad[1:] = grad[1:]+(lam/m)*(theta[1:])
-                return J, grad, h, a2, a1, m, y
-
-        else:
-            print "reg should be set to True or False to turn regularization on or off"
-            pass
+    else:
+        print "reg should be set to True or False to turn regularization on or off"
+        pass
 
 
 J, grad = costFunctionNe(X,y,theta1, theta2)
 
 np.log(np.e)
 y_map.shape
+
+
+ymapped = binaryMapper(y)
+
+ymapped
+h
+
+h*ymapped.T
