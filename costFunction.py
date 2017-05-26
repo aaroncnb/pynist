@@ -62,27 +62,25 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     h = forwardProp(X, theta1, theta2)
 
     # Get the cost without regularization:
-    if reg==False:
-
-        J = np.sum(
-            -(np.log(h)*y)-(np.log(1-h)*(1-y))
-                                        ) /m
-
-        print J
-        return J, grad
+    J = np.sum(
+        -(np.log(h)*y)-(np.log(1-h)*(1-y))
+                                    ) /m
 
     # with regularization:
-    elif reg==True:
-        J = J + (lam/(2.0*m))*np.sum(theta[1:]**2)
-        grad[1:] = grad[1:]+(lam/m)*(theta[1:])
-        return J, grad, h, a2, a1, m, y
+    if reg==True:
 
+        J = J + ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
+        print "Regularized"
     else:
-        print "reg should be set to True or False to turn regularization on or off"
-        pass
+        print "Unregularized"
 
+    print "Cost: "+str(J)
+    return J
 
-J, grad = costFunctionNe(X,y,theta1, theta2)
+J = costFunctionNe(X,y,theta1, theta2)
+
+J = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
+
 
 np.log(np.e)
 y_map.shape
