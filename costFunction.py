@@ -22,15 +22,8 @@ def loadTestData():
 X, y, theta1, theta2 = loadTestData()
 
 def sigmoid(z):
-    g = np.zeros(np.shape(z))
 
-    ones = np.ones(np.shape(z))
-    denom = ones+np.e**(-z)
-
-    g = ones/denom
-
-    return g
-
+    return 1 / (1 + np.exp(-z))
 
 def sigmoidGrad(z):
 
@@ -92,10 +85,12 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     # without regularization:
     if reg==False:
         J = np.sum(
-            -np.matmul(np.log(h),y)-np.matmul(np.log(1-h),(1-y))
+            np.matmul(np.log(h),y)-np.matmul(np.log(1-h),(1-y))
                         )/m
         grad = np.matmul(X.T,(h.T-y))/m
+        print J
         return J, grad, h, a2, a1, m, y
+
 
     # with regularization:
     elif reg==True:
@@ -108,8 +103,9 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
         pass
 
 
+
+
 J, grad, h, a2, a1, m, y_map = costFunctionNe(X,y,theta1, theta2)
 
 
-print J
 y_map.shape
