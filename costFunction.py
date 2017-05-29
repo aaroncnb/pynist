@@ -170,12 +170,12 @@ def costLowerer(X, y, theta1, theta2, alpha=0.0003, num_iters=100):
 
     # Initialize the parameters- use zeroes or random:
     ## Random initialization
-    #theta1 = np.random.standard_normal(size=np.shape(theta1))
-    #theta2 = np.random.standard_normal(size=np.shape(theta2))
+    theta1 = np.random.standard_normal(size=np.shape(theta1))
+    theta2 = np.random.standard_normal(size=np.shape(theta2))
 
     ## Zeroes initialization
-    theta1 = np.zeros(np.shape(theta1))
-    theta2 = np.zeros(np.shape(theta2))
+    #theta1 = np.zeros(np.shape(theta1))
+    #theta2 = np.zeros(np.shape(theta2))
 
     # Intialize the cost plot:
     Jplot, = plt.plot([],[])
@@ -205,7 +205,7 @@ def costLowerer(X, y, theta1, theta2, alpha=0.0003, num_iters=100):
 
     return theta1, theta2
 # Test the minimizer:
-theta1, theta2 = costLowerer(X,y, theta1, theta2)
+theta1, theta2 = costLowerer(X,y, theta1, theta2, num_iters=200)
 
 np.shape(a3)
 
@@ -251,6 +251,9 @@ def outputMapper(output, expected):
     print "Score: "+str(score)+"% correct labels"
     return output_label, result, score
 
+def finalTester():
+
+    # Wrapper function that trains the model, applies it to test data, and gives the score:
 
 output_label, result, score = outputMapper(a3, y)
 score
