@@ -162,22 +162,26 @@ plt.show()
 
 plt.show()
 
-def costLowerer(X, y, alpha=1, num_iters=100):
-
+def costLowerer(X, y, theta1, theta2, alpha=0.0005, num_iters=100):
     ## A simple minimization function:
 
+    # theta1 and theta2 are just templates giving the parameter matrix dimensions
 
     # Initialize the parameters- use zeroes or random:
+    ## Random initialization
+    #theta1 = np.random.standard_normal(size=np.shape(theta1))
+    #theta2 = np.random.standard_normal(size=np.shape(theta2))
 
-    theta1_init = np.random.standard_normal(size=np.shape(theta1))
-    theta2_init = np.random.standard_normal(size=np.shape(theta2))
+    ## Zeroes initialization
+    theta1 = np.zeros(np.shape(theta1))
+    theta2 = np.zeros(np.shape(theta2))
 
     # Intialize the cost plot:
     Jplot, = plt.plot([],[])
-    Jplot.set_xlim([0,num_iters])
+    plt.xlim([0,num_iters])
     plt.show()
 
-    for i in num_iters:
+    for i in range(0,num_iters):
 
         # Forward pass (get the cost):
         J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
@@ -187,15 +191,17 @@ def costLowerer(X, y, alpha=1, num_iters=100):
 
         # Take a learning-rate-sized step along the gradients:
         ## These updates need to be simultaneous!
-        theta1_ = theta1 + grad1
-        theta2_ = theta2 + grad2
+        theta1_ = theta1 - grad1*alpha
+        theta2_ = theta2 - grad2*alpha
 
         theta1 = theta1_
         theta2 = theta2_
 
         Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
-
+        Jplot.set_xdata(np.append(Jplot.get_xdata(),i))
         plt.draw()
 
 
     return theta1, theta2
+
+theta1, theta2 = costLowerer(X,y, theta1, theta2)
