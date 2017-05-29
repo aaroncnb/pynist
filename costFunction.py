@@ -139,17 +139,63 @@ def backProp(a1, a2, a3, y, reg=False, lam=None):
 
 d1, d2 = backProp(a1, a2, a3, y)
 
+np.min(theta1)+np.max(theta1)
+np.median(theta1)
+import matplotlib.pyplot as plt
 
-def costLowerer(X, y, theta1_init, theta2_init, alpha=1, num_iters=100):
+plt.hist(theta1.flatten())
+plt.show()
+
+theta1_init = np.random.standard_normal(size=np.shape(theta1))
+theta1_init
+
+
+fig = plt.figure()
+plt.scatter(0,0)
+plt.scatter(1,1)
+plt.show()
+plt.close()
+
+Jplot, = plt.plot([],[])
+plt.xlim([0,100])
+plt.show()
+
+plt.show()
+
+def costLowerer(X, y, alpha=1, num_iters=100):
 
     ## A simple minimization function:
 
-    # Forward pass (get the cost):
-    J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
 
-    # Reverse pass (get the gradients):
-    grad1, grad2 = backProp(a1, a2, a3, y)
+    # Initialize the parameters- use zeroes or random:
 
-    # Take a learning-rate-sized step along the gradients:
-    theta1 += grad1
-    theta2 += grad2
+    theta1_init = np.random.standard_normal(size=np.shape(theta1))
+    theta2_init = np.random.standard_normal(size=np.shape(theta2))
+
+    # Intialize the cost plot:
+    Jplot, = plt.plot([],[])
+    Jplot.set_xlim([0,num_iters])
+    plt.show()
+
+    for i in num_iters:
+
+        # Forward pass (get the cost):
+        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
+
+        # Reverse pass (get the gradients):
+        grad1, grad2 = backProp(a1, a2, a3, y)
+
+        # Take a learning-rate-sized step along the gradients:
+        ## These updates need to be simultaneous!
+        theta1_ = theta1 + grad1
+        theta2_ = theta2 + grad2
+
+        theta1 = theta1_
+        theta2 = theta2_
+
+        Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
+
+        plt.draw()
+
+
+    return theta1, theta2
