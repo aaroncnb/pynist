@@ -20,6 +20,9 @@ def loadTestData():
 
     return X, y, theta1, theta2
 
+def getMnistData():
+
+
 X, y, theta1, theta2 = loadTestData()
 
 def sigmoid(z):
