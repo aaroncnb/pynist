@@ -86,6 +86,7 @@ J = costFunctionNe(X,y,theta1, theta2)
 J = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
 
 s3 = a3 - binaryMapper(y).T
+np.shape(s3)
 np.shape(theta2)
 np.shape(a2)
 np.shape(a1)
@@ -93,18 +94,47 @@ np.shape(theta1)
 np.shape(theta2.dot(a2))
 np.shape(theta1.dot(a1.T))
 # The second layer:
-s2 = theta2.T.dot(s3)*sigmoidGrad(theta2.dot(a2))
+np.shape(theta2.T.dot(s3))
+s2 = theta2.T.dot(s3)[1:]*sigmoidGrad(theta1.dot(a1.T))
 
 np.shape(theta2.T.dot(s3))
 
-
+d1 = s2.dot(a1)
+np.shape(d1)
+np.shape(theta1)
+d2 = s3.dot(a2.T)
+np.shape(d2)
+np.shape(theta2)
 
 #*sigmoidGrad(theta1.dot(a1.T))
 
-def backProp(a1, a2, a3, y):
+def backProp(a1, a2, a3, y, reg=False, lam=None):
 
     # Get the 'error' for the third layer (aka first step of back-propagation):
-    s3 = a3 - y
 
-    # The second layer:
-    s2 = theta2.T*s3*sigmoidGrad(theta1.dot(a1.T))
+    # Number of training examples
+    m  = np.size(y)
+
+    # The difference between expected and output values:
+    ### (Input labels are mapped to binary vectors)
+    s3 = a3 - binaryMapper(y).T
+
+    # The second backprop layer: Applying the activation function's derivative:
+    s2 = theta2.T.dot(s3)[1:]*sigmoidGrad(theta1.dot(a1.T))
+
+    # Gradients along Theta 1 (should be the same dim as theta1!):
+    d1 = s2.dot(a1)
+
+    # Gradients along Theta 2 (should be the same dim as theta1!):
+    d2 = s3.dot(a2.T)
+
+    # Apply regularization if needed:
+    ## Essentially just scale by the ratio of lambda to n-examples.
+    if reg==True:
+
+        d1 += (lam/m)*d1
+        d2 += (lam/m)*d2
+
+    return d1, d2
+
+d1, d2 = backProp(a1, a2, a3, y)
