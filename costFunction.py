@@ -132,8 +132,8 @@ def backProp(a1, a2, a3, y, reg=False, lam=None):
     ## Essentially just scale by the ratio of lambda to n-examples.
     if reg==True:
 
-        d1 += (lam/m)*d1
-        d2 += (lam/m)*d2
+        d1 += (lam/m)*theta1
+        d2 += (lam/m)*theta2
 
     return d1, d2
 
@@ -203,5 +203,14 @@ def costLowerer(X, y, theta1, theta2, alpha=0.0003, num_iters=100):
 
 
     return theta1, theta2
-
+# Test the minimizer:
 theta1, theta2 = costLowerer(X,y, theta1, theta2)
+
+a3
+
+np.max(a3, axis=0)
+def outputMapper(output, expected):
+
+    # Maps the output layer back to the labels and gives the F1 score:
+
+    output = np.max(output)
