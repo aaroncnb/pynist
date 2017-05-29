@@ -162,7 +162,7 @@ plt.show()
 
 plt.show()
 
-def costLowerer(X, y, theta1, theta2, alpha=0.0005, num_iters=100):
+def costLowerer(X, y, theta1, theta2, alpha=0.0003, num_iters=100):
     ## A simple minimization function:
 
     # theta1 and theta2 are just templates giving the parameter matrix dimensions
@@ -184,7 +184,7 @@ def costLowerer(X, y, theta1, theta2, alpha=0.0005, num_iters=100):
     for i in range(0,num_iters):
 
         # Forward pass (get the cost):
-        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
+        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=0.3, reg=True)
 
         # Reverse pass (get the gradients):
         grad1, grad2 = backProp(a1, a2, a3, y)
