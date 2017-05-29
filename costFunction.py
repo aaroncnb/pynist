@@ -5,7 +5,7 @@ def loadTestData():
 
     from scipy.io import matlab
 
-    testPath    = '/home/aaronb/Downloads/Coursera/machinelearning/machine-learning-ex4/ex4/'
+    testPath    = '/home/aaronb/Projectbrary/python/pynist/data/'
     dataFile    = testPath + 'ex4data1.mat'
     weightsFile = testPath + 'ex4weights.mat'
 
@@ -157,6 +157,7 @@ plt.show()
 plt.close()
 
 Jplot, = plt.plot([],[])
+
 plt.xlim([0,100])
 plt.show()
 
@@ -206,11 +207,56 @@ def costLowerer(X, y, theta1, theta2, alpha=0.0003, num_iters=100):
 # Test the minimizer:
 theta1, theta2 = costLowerer(X,y, theta1, theta2)
 
-a3
+np.shape(a3)
 
-np.max(a3, axis=0)
+a3_max = np.max(a3, axis=0)
+
+a3_labels = np.where(a3_max == a3)[0]
+
+np.shape(a3_labels)
+
+print a3_labels
+np.shape(y)
+
+
+
+np.shape(y.flatten()==a3_labels)
+y.flatten()==a3_labels
+np.count_nonzero(y.flatten()==a3_labels)
+
 def outputMapper(output, expected):
 
     # Maps the output layer back to the labels and gives the F1 score:
+    m = np.size(y)
+    # Take just the elements on each row with the highest value:
+    ## In other words, the highest probability det. by the NN
 
-    output = np.max(output)
+    output_maxprob = np.max(output, axis=0)
+
+    # Convert output into a simple list that gives the label for each example
+    ## that corresponds to the highest probability output
+
+    output_label = np.where(output_maxprob == output)[0] # 'where' gives the full coordinates. we just need the "x" component.
+
+    # Now we measure the success of the model via the F1 score:
+    ##
+
+    result = expected.flatten()==output_label
+
+    n_correct = np.count_nonzero(result)
+
+    score = (float(n_correct)/m)*100
+
+
+    print "Score: "+str(score)+"% correct labels"
+    return output_label, result, score
+
+
+output_label, result, score = outputMapper(a3, y)
+score
+output_label
+result
+np.count_nonzero(result)
+np.count_nonzero(result)/np.size(a3[0])
+np.size(a3[0])
+float(4462)/5000
