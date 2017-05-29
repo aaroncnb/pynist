@@ -28,7 +28,7 @@ def sigmoid(z):
 
 def sigmoidGrad(z):
 
-    return sigmoid(z)*(1-sigmoid(g))
+    return sigmoid(z)*(1-sigmoid(z))
 
 def binaryMapper(y):
 
@@ -51,7 +51,11 @@ def forwardProp(X,theta1, theta2):
         sigmoid(theta1.dot(a1.T)),
                     0,1, axis=0)
 
-    return sigmoid(theta2.dot(a2))
+    a3 = sigmoid(theta2.dot(a2))
+
+    return a1, a2, a3
+
+a1, a2, a3 = forwardProp(X, theta1, theta2)
 
 def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     # Get the number of training examples:
@@ -59,36 +63,48 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     # Map labels to binary vectors:
     y = binaryMapper(y).T
     # Feed it forward:
-    h = forwardProp(X, theta1, theta2)
+    a1, a2, a3 = forwardProp(X, theta1, theta2)
 
     # Get the cost without regularization:
     J = np.sum(
-        -(np.log(h)*y)-(np.log(1-h)*(1-y))
+        -(np.log(a3)*y)-(np.log(1-a3)*(1-y))
                                     ) /m
 
     # with regularization:
     if reg==True:
 
-        J = J + ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
+        J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
         print "Regularized"
     else:
         print "Unregularized"
 
     print "Cost: "+str(J)
-    return J
+    return J, a1, a2, a3
 
 J = costFunctionNe(X,y,theta1, theta2)
 
 J = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
 
+s3 = a3 - binaryMapper(y).T
+np.shape(theta2)
+np.shape(a2)
+np.shape(a1)
+np.shape(theta1)
+np.shape(theta2.dot(a2))
+np.shape(theta1.dot(a1.T))
+# The second layer:
+s2 = theta2.T.dot(s3)*sigmoidGrad(theta2.dot(a2))
 
-np.log(np.e)
-y_map.shape
+np.shape(theta2.T.dot(s3))
 
 
-ymapped = binaryMapper(y)
 
-ymapped
-h
+#*sigmoidGrad(theta1.dot(a1.T))
 
-h*ymapped.T
+def backProp(a1, a2, a3, y):
+
+    # Get the 'error' for the third layer (aka first step of back-propagation):
+    s3 = a3 - y
+
+    # The second layer:
+    s2 = theta2.T*s3*sigmoidGrad(theta1.dot(a1.T))
