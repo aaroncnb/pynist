@@ -138,3 +138,18 @@ def backProp(a1, a2, a3, y, reg=False, lam=None):
     return d1, d2
 
 d1, d2 = backProp(a1, a2, a3, y)
+
+
+def costLowerer(X, y, theta1_init, theta2_init, alpha=1, num_iters=100):
+
+    ## A simple minimization function:
+
+    # Forward pass (get the cost):
+    J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
+
+    # Reverse pass (get the gradients):
+    grad1, grad2 = backProp(a1, a2, a3, y)
+
+    # Take a learning-rate-sized step along the gradients:
+    theta1 += grad1
+    theta2 += grad2
