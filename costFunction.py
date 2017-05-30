@@ -1,4 +1,7 @@
 import numpy as np
+import struct
+import os
+import idx2numpy
 
 
 def loadTestData():
@@ -20,7 +23,18 @@ def loadTestData():
 
     return X, y, theta1, theta2
 
-def getMnistData():
+def getMnistDataSimple(ddir):
+
+    train_labels = idx2numpy.convert_from_file(ddir + "image-labels.idx1-ubyte")
+
+    train_images = idx2numpy.convert_from_file(ddir + "image-images.idx3-ubyte")
+
+    test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx3-ubyte")
+
+    test_images = idx2numpy.conver_from_file(ddir + "t10k-images.idx3-ubyte")
+
+    return train_labels, train_images, test_labels, test_images
+
 
 
 X, y, theta1, theta2 = loadTestData()
