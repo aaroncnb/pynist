@@ -20,24 +20,24 @@ def getMnistDataSimple(ddir):
 
 ddir = '/home/aaronb/Codebrary/Python/pynist/data/raw/'
 train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
-
-# Compare shapes of raw MNIST arrays with Octave example arrays:
-np.shape(train_labels)
-np.shape(train_images)
-np.shape(test_labels)
-np.shape(test_images)
-
-#It seems like the code should work fine for the raw structure as well.
-# Just add a '.flatten()' after reading in each image.
-print train_labels[100]
-
-
-
-X = train_images
-y = train_labels
-np.shape(y)
-y = np.reshape(y,(np.size(y),1))
-X_re = np.reshape(X,(60000,28**2)).copy()
+#
+# # Compare shapes of raw MNIST arrays with Octave example arrays:
+# np.shape(train_labels)
+# np.shape(train_images)
+# np.shape(test_labels)
+# np.shape(test_images)
+#
+# #It seems like the code should work fine for the raw structure as well.
+# # Just add a '.flatten()' after reading in each image.
+# print train_labels[100]
+#
+#
+#
+# X = train_images
+# y = train_labels
+# np.shape(y)
+# y = np.reshape(y,(np.size(y),1))
+# X_re = np.reshape(X,(60000,28**2)).copy()
 
 def reshapeImages(X, width=28, n_imgs=60000):
 
@@ -296,27 +296,5 @@ def outputMapper(output, expected):
     print "Score: "+str(score)+"% correct labels"
     return output_label, result, score
 
-a3_max = np.max(a3,axis=0)
-a3_label = np.where(a3_max == a3)[0]
 
-a3_label
-
-
-np.count_nonzero(a3_label==y)
-
-y
-
-outputMapper(a3,y.T)
-
-def finalTester():
-
-    # Wrapper function that trains the model, applies it to test data, and gives the score:
-
-output_label, result, score = outputMapper(a3, y)
-score
-output_label
-result
-np.count_nonzero(result)
-np.count_nonzero(result)/np.size(a3[0])
-np.size(a3[0])
-float(4462)/5000
+output_label, result score = outputMapper(a3,y)
