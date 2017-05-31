@@ -3,41 +3,64 @@ import struct
 import os
 import idx2numpy
 
+# mddir = '/home/aaronb/Codebrary/Python/pynist/data/'
 
-def loadTestData():
+# def loadTestData(mddir):
+#
+#     from scipy.io import matlab
+#
+#     dataFile    = mddir + 'ex4data1.mat'
+#     weightsFile = mddir + 'ex4weights.mat'
+#
+#     data    = matlab.loadmat(dataFile)
+#     weights = matlab.loadmat(weightsFile)
+#
+#     y = data['y']
+#     X = data['X']
+#
+#     theta1 = weights['Theta1']
+#     theta2 = weights['Theta2']
+#
+#     return X, y, theta1, theta2
+#
+# X, y, theta1, theta2 = loadTestData(mddir)
 
-    from scipy.io import matlab
-
-    testPath    = '/home/aaronb/Projectbrary/python/pynist/data/'
-    dataFile    = testPath + 'ex4data1.mat'
-    weightsFile = testPath + 'ex4weights.mat'
-
-    data    = matlab.loadmat(dataFile)
-    weights = matlab.loadmat(weightsFile)
-
-    y = data['y']
-    X = data['X']
-
-    theta1 = weights['Theta1']
-    theta2 = weights['Theta2']
-
-    return X, y, theta1, theta2
 
 def getMnistDataSimple(ddir):
 
-    train_labels = idx2numpy.convert_from_file(ddir + "image-labels.idx1-ubyte")
+    train_labels = idx2numpy.convert_from_file(ddir + "train-labels.idx1-ubyte")
 
-    train_images = idx2numpy.convert_from_file(ddir + "image-images.idx3-ubyte")
+    train_images = idx2numpy.convert_from_file(ddir + "train-images.idx3-ubyte")
 
-    test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx3-ubyte")
+    test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx1-ubyte")
 
-    test_images = idx2numpy.conver_from_file(ddir + "t10k-images.idx3-ubyte")
+    test_images = idx2numpy.convert_from_file(ddir + "t10k-images.idx3-ubyte")
 
     return train_labels, train_images, test_labels, test_images
 
+ddir = '/home/aaronb/Codebrary/Python/pynist/data/raw/'
+train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
+
+# Compare shapes of raw MNIST arrays with Octave example arrays:
+np.shape(train_labels)
+np.shape(train_images)
+np.shape(test_labels)
+np.shape(test_images)
+# np.shape(X)
+# np.shape(y)
+
+#It seems like the code should work fine for the raw structure as well.
+# Just add a '.flatten()' after reading in each image.
+print train_labels[100]
+
+# The labels also have the same structure as 'y', so the same 'binaryMapper' should work
+
+binaryMapper(train_labels)
 
 
-X, y, theta1, theta2 = loadTestData()
+X = train_images
+y = train_labels
+
 
 def sigmoid(z):
 
@@ -50,7 +73,7 @@ def sigmoidGrad(z):
 def binaryMapper(y):
 
     m = np.size(y)
-
+    y = np.array([y]).T
     # Map labels to binary label vectors
     y_temp    = np.arange(1,11,1)
     y_broad   = np.ones([10,np.size(y)])
