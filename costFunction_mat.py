@@ -3,7 +3,28 @@ import struct
 import os
 import idx2numpy
 import matplotlib.pyplot as plt
+mddir = '/home/aaronb/Codebrary/Python/pynist/data/'
 
+def loadTestData(mddir):
+
+    from scipy.io import matlab
+
+    dataFile    = mddir + 'ex4data1.mat'
+    weightsFile = mddir + 'ex4weights.mat'
+
+    data    = matlab.loadmat(dataFile)
+    weights = matlab.loadmat(weightsFile)
+
+    y = data['y']
+    X = data['X']
+
+    theta1 = weights['Theta1']
+    theta2 = weights['Theta2']
+
+    return X, y, theta1, theta2
+np.shape(theta1)
+np.shape(theta2)
+X, y, theta1, theta2 = loadTestData(mddir)
 
 
 def getMnistDataSimple(ddir):
@@ -26,17 +47,21 @@ np.shape(train_labels)
 np.shape(train_images)
 np.shape(test_labels)
 np.shape(test_images)
+# np.shape(X)
+# np.shape(y)
 
 #It seems like the code should work fine for the raw structure as well.
 # Just add a '.flatten()' after reading in each image.
 print train_labels[100]
 
+# The labels also have the same structure as 'y', so the same 'binaryMapper' should work
 
+binaryMapper(train_labels)
 
+np.size(X)
 X = train_images
 y = train_labels
-np.shape(y)
-y = np.reshape(y,(np.size(y),1))
+
 X_re = np.reshape(X,(60000,28**2)).copy()
 
 def reshapeImages(X, width=28, n_imgs=60000):
@@ -55,21 +80,16 @@ def sigmoidGrad(z):
 
     return sigmoid(z)*(1-sigmoid(z))
 
-def binaryMapper(y, nlabels=10):
+def binaryMapper(y):
 
     m = np.size(y)
-
+    y = np.array([y]).T
     # Map labels to binary label vectors
-    y_temp    = np.arange(0,nlabels)
-    y_broad   = np.ones((np.size(y),nlabels))
+    y_temp    = np.arange(1,11,1)
+    y_broad   = np.ones([10,np.size(y)])
 
-    return np.array(y*y_broad==y_temp, dtype=int)
-# np.size(y)
-# np.arange(0,10)
-# binaryMapper(y)
-# y
-# y
-# np.shape(y)
+    return np.array(y*y_broad.T==y_temp, dtype=int)
+
 
 def forwardProp(X,theta1, theta2):
 
@@ -84,8 +104,6 @@ def forwardProp(X,theta1, theta2):
     return a1, a2, a3
 
 #a1, a2, a3 = forwardProp(X, theta1, theta2)
-
-
 
 def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     # Get the number of training examples:
@@ -111,45 +129,38 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     print "Cost: "+str(J)
     return J, a1, a2, a3
 
+#theta1 = np.random.standard_normal(size=(25,785))
+theta1 = np.zeros((25,785))
+theta2 = np.random.standard_normal(size=np.shape(theta2))
+np.shape(theta2)
+J = costFunctionNe(X,y,theta1, theta2)
 
-# nneurons = 25
-# nlabels = 10
-# theta1 = np.zeros((nneurons,np.size(X[0])+1))
-# theta2 = np.zeros((nlabels,nneurons+1))
-#
-# costFunctionNe(X, y,theta1, theta2, lam=1, reg=True)
-#
-#
-#
-#  np.shape(theta2)
-#
-# J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
-# s3 = a3 - binaryMapper(y).T
-# np.shape(s3)
-# pr
-# # np.shape(theta2)
-# # np.shape(a2)
-# # np.shape(a1)
-# # np.shape(theta1)
-# # np.shape(theta2.dot(a2))
-# # np.shape(theta1.dot(a1.T))
-# # # The second layer:
-# # np.shape(theta2.T.dot(s3))
-# # s2 = theta2.T.dot(s3)[1:]*sigmoidGrad(theta1.dot(a1.T))
-# #
-# # np.shape(theta2.T.dot(s3))
-# #
-# # d1 = s2.dot(a1)
-# # np.shape(d1)
-# # np.shape(theta1)
-# # d2 = s3.dot(a2.T)
-# # np.shape(d2)
-# # np.shape(theta2)
-#
-# #*sigmoidGrad(theta1.dot(a1.T))
+J = costFunctionNe(X,y,theta1, theta2, lam=1, reg=True)
 
+s3 = a3 - binaryMapper(y).T
+np.shape(s3)
+np.shape(theta2)
+np.shape(a2)
+np.shape(a1)
+np.shape(theta1)
+np.shape(theta2.dot(a2))
+np.shape(theta1.dot(a1.T))
+# The second layer:
+np.shape(theta2.T.dot(s3))
+s2 = theta2.T.dot(s3)[1:]*sigmoidGrad(theta1.dot(a1.T))
 
-def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
+np.shape(theta2.T.dot(s3))
+
+d1 = s2.dot(a1)
+np.shape(d1)
+np.shape(theta1)
+d2 = s3.dot(a2.T)
+np.shape(d2)
+np.shape(theta2)
+
+#*sigmoidGrad(theta1.dot(a1.T))
+
+def backProp(a1, a2, a3, y, reg=False, lam=None):
 
     # Get the 'error' for the third layer (aka first step of back-propagation):
 
@@ -178,60 +189,60 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
 
     return d1, d2
 
-# d1, d2 = backProp(a1, a2, a3, y)
-#
-# np.min(theta1)+np.max(theta1)
-# np.median(theta1)
-#
-#
-# plt.hist(theta1.flatten())
-# plt.show()
-#
-# theta1_init = np.random.standard_normal(size=np.shape(theta1))
-# theta1_init
-#
-#
-# fig = plt.figure()
-# plt.scatter(0,0)
-# plt.scatter(1,1)
-# plt.show()
-# plt.close()
-#
-# Jplot, = plt.plot([],[])
-#
-# plt.xlim([0,100])
-# plt.show()
-#
-# plt.show()
-# np.max(y)
-# np.size(X[0])
+d1, d2 = backProp(a1, a2, a3, y)
 
-def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.0001, num_iters=100, lam=1, reg=True):
+np.min(theta1)+np.max(theta1)
+np.median(theta1)
+
+
+plt.hist(theta1.flatten())
+plt.show()
+
+theta1_init = np.random.standard_normal(size=np.shape(theta1))
+theta1_init
+
+
+fig = plt.figure()
+plt.scatter(0,0)
+plt.scatter(1,1)
+plt.show()
+plt.close()
+
+Jplot, = plt.plot([],[])
+
+plt.xlim([0,100])
+plt.show()
+
+plt.show()
+np.max(y)
+np.size(X[0])
+
+def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.0003, num_iters=100):
     ## A simple minimization function:
 
     # theta1 and theta2 are just templates giving the parameter matrix dimensions
 
     # Initialize the parameters- use zeroes or random:
     ## Random initialization
-    theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/2
-    theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))/10
+    theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))
+    theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))
 
     ## Zeroes initialization
-    #theta1 = np.zeros((nneurons,np.size(X[0])+1))
-    #theta2 = np.zeros((nlabels,nneurons+1))
+    #theta1 = np.zeros(np.shape(theta1))
+    #theta2 = np.zeros(np.shape(theta2))
 
     # Intialize the cost plot:
-    # Jplot, = plt.plot([],[])
-    # plt.xlim([0,num_iters])
-    # plt.show()
+    Jplot, = plt.plot([],[])
+    plt.xlim([0,num_iters])
+    plt.show()
 
     for i in range(0,num_iters):
 
         # Forward pass (get the cost):
-        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=lam, reg=reg)
+        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=0.3, reg=True)
 
         # Reverse pass (get the gradients):
-        grad1, grad2 = backProp(a1, a2, a3, theta1,theta2, y, lam=lam, reg=reg)
+        grad1, grad2 = backProp(a1, a2, a3, y)
 
         # Take a learning-rate-sized step along the gradients:
         ## These updates need to be simultaneous!
@@ -241,31 +252,31 @@ def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.0001, num_iters=100, lam=
         theta1 = theta1_
         theta2 = theta2_
 
-        # Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
-        # Jplot.set_xdata(np.append(Jplot.get_xdata(),i))
-        # plt.draw()
+        Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
+        Jplot.set_xdata(np.append(Jplot.get_xdata(),i))
+        plt.draw()
 
 
-    return theta1, theta2, J, a1, a2, a3
+    return theta1, theta2
 # Test the minimizer:
-theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, num_iters=20)
-#
-# np.shape(a3)
-#
-# a3_max = np.max(a3, axis=0)
-#
-# a3_labels = np.where(a3_max == a3)[0]
-#
-# np.shape(a3_labels)
-#
-# print a3_labels
-# np.shape(y)
-#
-#
-#
-# np.shape(y.flatten()==a3_labels)
-# y.flatten()==a3_labels
-# np.count_nonzero(y.flatten()==a3_labels)
+theta1, theta2 = costLowerer(X,y, num_iters=200)
+
+np.shape(a3)
+
+a3_max = np.max(a3, axis=0)
+
+a3_labels = np.where(a3_max == a3)[0]
+
+np.shape(a3_labels)
+
+print a3_labels
+np.shape(y)
+
+
+
+np.shape(y.flatten()==a3_labels)
+y.flatten()==a3_labels
+np.count_nonzero(y.flatten()==a3_labels)
 
 def outputMapper(output, expected):
 
@@ -293,9 +304,6 @@ def outputMapper(output, expected):
 
     print "Score: "+str(score)+"% correct labels"
     return output_label, result, score
-y
-a3
-outputMapper(a3,y)
 
 def finalTester():
 
