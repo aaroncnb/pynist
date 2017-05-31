@@ -206,13 +206,14 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
 # np.max(y)
 # np.size(X[0])
 
-def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.0001, num_iters=100, lam=1, reg=True):
+def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.001, num_iters=100, lam=1, reg=True):
     ## A simple minimization function:
 
     # theta1 and theta2 are just templates giving the parameter matrix dimensions
 
     # Initialize the parameters- use zeroes or random:
     ## Random initialization
+    #theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/2
     theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/2
     theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))/10
 
@@ -248,8 +249,9 @@ def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.0001, num_iters=100, lam=
 
     return theta1, theta2, J, a1, a2, a3
 # Test the minimizer:
-theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, num_iters=20)
+theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, alpha = 1e-5,  num_iters=200)
 #
+print J
 # np.shape(a3)
 #
 # a3_max = np.max(a3, axis=0)
@@ -293,9 +295,18 @@ def outputMapper(output, expected):
 
     print "Score: "+str(score)+"% correct labels"
     return output_label, result, score
+
+a3_max = np.max(a3,axis=0)
+a3_label = np.where(a3_max == a3)[0]
+
+a3_label
+
+
+np.count_nonzero(a3_label==y)
+
 y
-a3
-outputMapper(a3,y)
+
+outputMapper(a3,y.T)
 
 def finalTester():
 
