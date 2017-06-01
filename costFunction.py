@@ -17,8 +17,9 @@ def getMnistDataSimple(ddir):
 
     return train_labels, train_images, test_labels, test_images
 
-#ddir = '/home/aaronb/Codebrary/Python/pynist/data/raw/'
-ddir = '/home/aaronb/Projectbrary/python/pynist/data/raw/'
+ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
+#ddir = '/home/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
+#ddir = '/home/aaronb/Projectbrary/python/pynist/data/raw/'
 
 
 train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
@@ -38,7 +39,8 @@ train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
 X = train_images
 
 plt.imshow(X[0])
-plt.show()
+plt.ion()
+#plt.show()
 
 y = train_labels
 y[0]
@@ -117,8 +119,8 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
 
     return J, a1, a2, a3
 
-np.shape(theta1)
-np.shape(theta2)
+#np.shape(theta1)
+#np.shape(theta2)
 # nneurons = 25
 # nlabels = 10
 # theta1 = np.zeros((nneurons,np.size(X[0])+1))
@@ -211,7 +213,7 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
 #
 # plt.show()
 # np.max(y)
-np.size(X[0])
+#np.size(X[0])
 
 def costLowerer(X, y, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True):
     ## A simple minimization function:
@@ -229,9 +231,9 @@ def costLowerer(X, y, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
     #theta2 = np.zeros((nlabels,nneurons+1))
 
     # Intialize the cost plot:
-    # Jplot, = plt.plot([],[])
-    # plt.xlim([0,num_iters])
-    # plt.show()
+    Jplot, = plt.plot([],[])
+    plt.xlim([0,num_iters])
+    plt.show()
 
     for i in range(0,num_iters):
 
@@ -250,14 +252,15 @@ def costLowerer(X, y, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
         theta2 = theta2_
 
         print "Iteration #"+str(i)+" of "+str(num_iters)
-        # Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
-        # Jplot.set_xdata(np.append(Jplot.get_xdata(),i))
-        # plt.draw()
+        Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
+        Jplot.set_xdata(np.append(Jplot.get_xdata(),i))
+        plt.draw()
 
 
     return theta1, theta2, J, a1, a2, a3
 # Test the minimizer:
-theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, lam=1, alpha = 1e-5,  num_iters=1000, reg=True)
+theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 25, lam=1, 
+alpha = 1e-5, num_iters=1000, reg=True)
 
 def showWeighImgs(theta1, theta2):
 
@@ -286,10 +289,10 @@ showWeighImgs(theta1,theta2)
 
 
 
-plt.imshow(filters.reshape(10,28,28)[5]); plt.show()
+#plt.imshow(filters.reshape(10,28,28)[5]); plt.show()
 
 
-print J
+#print J
 # np.shape(a3)
 #
 # a3_max = np.max(a3, axis=0)
@@ -334,13 +337,13 @@ def outputMapper(output, expected):
     print "Score: "+str(score)+"% correct labels"
     return output_label, result, score
 
-np.max(a3)
+#np.max(a3)
 output_label, result, score = outputMapper(a3,y)
 
 
-np.fliplr([output_label])[0]
-y.flatten()
-plt.hist(output_label)
-plt.show()
-plt.hist(y)
-plt.show()
+#np.fliplr([output_label])[0]
+#y.flatten()
+#plt.hist(output_label)
+#plt.show()
+#plt.hist(y)
+#plt.show()
