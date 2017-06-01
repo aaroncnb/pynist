@@ -5,7 +5,6 @@ import idx2numpy
 import matplotlib.pyplot as plt
 
 
-
 def getMnistDataSimple(ddir):
 
     train_labels = idx2numpy.convert_from_file(ddir + "train-labels.idx1-ubyte")
@@ -18,7 +17,10 @@ def getMnistDataSimple(ddir):
 
     return train_labels, train_images, test_labels, test_images
 
-ddir = '/home/aaronb/Codebrary/Python/pynist/data/raw/'
+#ddir = '/home/aaronb/Codebrary/Python/pynist/data/raw/'
+ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
+
+
 train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
 #
 # # Compare shapes of raw MNIST arrays with Octave example arrays:
@@ -33,10 +35,10 @@ train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
 #
 #
 #
-# X = train_images
-# y = train_labels
+X = train_images
+y = train_labels
 # np.shape(y)
-# y = np.reshape(y,(np.size(y),1))
+y = np.reshape(y,(np.size(y),1))
 # X_re = np.reshape(X,(60000,28**2)).copy()
 
 def reshapeImages(X, width=28, n_imgs=60000):
@@ -249,7 +251,7 @@ def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.001, num_iters=100, lam=1
 
     return theta1, theta2, J, a1, a2, a3
 # Test the minimizer:
-theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, alpha = 1e-5,  num_iters=200)
+theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, alpha = 1e-5,  num_iters=20)
 #
 print J
 # np.shape(a3)
@@ -297,4 +299,4 @@ def outputMapper(output, expected):
     return output_label, result, score
 
 
-output_label, result score = outputMapper(a3,y)
+output_label, result, score = outputMapper(a3,y)
