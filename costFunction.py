@@ -18,7 +18,7 @@ def getMnistDataSimple(ddir):
     return train_labels, train_images, test_labels, test_images
 
 #ddir = '/home/aaronb/Codebrary/Python/pynist/data/raw/'
-ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
+ddir = '/home/aaronb/Projectbrary/python/pynist/data/raw/'
 
 
 train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
@@ -36,8 +36,12 @@ train_labels, train_images, test_labels, test_images = getMnistDataSimple(ddir)
 #
 #
 X = train_images
+
+plt.imshow(X[0])
+plt.show()
+
 y = train_labels
-# np.shape(y)
+y[0]
 y = np.reshape(y,(np.size(y),1))
 # X_re = np.reshape(X,(60000,28**2)).copy()
 
@@ -106,6 +110,7 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     if reg==True:
 
         J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
+        #J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[1:,:]**2) )*(lam/(2.0*m) ) )
         print "Regularized"
     else:
         print "Unregularized"
@@ -113,7 +118,8 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     print "Cost: "+str(J)
     return J, a1, a2, a3
 
-
+np.shape(theta1)
+np.shape(theta2)
 # nneurons = 25
 # nlabels = 10
 # theta1 = np.zeros((nneurons,np.size(X[0])+1))
@@ -206,9 +212,9 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
 #
 # plt.show()
 # np.max(y)
-# np.size(X[0])
+np.size(X[0])
 
-def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.001, num_iters=100, lam=1, reg=True):
+def costLowerer(X, y, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True):
     ## A simple minimization function:
 
     # theta1 and theta2 are just templates giving the parameter matrix dimensions
@@ -251,8 +257,37 @@ def costLowerer(X, y, nneurons=25, nlabels=10, alpha=0.001, num_iters=100, lam=1
 
     return theta1, theta2, J, a1, a2, a3
 # Test the minimizer:
-theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, alpha = 1e-5,  num_iters=20)
-#
+theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, lam=1, alpha = 1e-5,  num_iters=100, reg=True)
+
+def showWeighImgs(theta1, theta2):
+
+    nlabels = np.size(theta2[:,0])
+
+    filters = theta2[:,1:].dot(theta1[:,1:])
+
+    fig = plt.figure(figsize=(11.69,8.27))
+
+    for lbl in  range(0, nlabels):
+
+        ax = fig.add_subplot(2,5,lbl+1)
+
+        ax.imshow(filters.reshape(10,28,28)[lbl])
+
+        aspect = abs(ax.get_xlim()[1] - ax.get_xlim()[0]) / abs(ax.get_ylim()[1] - ax.get_ylim()[0])
+        ax.set_aspect(aspect)
+
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.95, bottom=0.05)
+
+    plt.show()
+
+showWeighImgs(theta1,theta2)
+
+
+
+plt.imshow(filters.reshape(10,28,28)[5]); plt.show()
+
+
 print J
 # np.shape(a3)
 #
@@ -275,6 +310,7 @@ def outputMapper(output, expected):
 
     # Maps the output layer back to the labels and gives the F1 score:
     m = np.size(y)
+    print "Number of samples checked: "+str(m)
     # Take just the elements on each row with the highest value:
     ## In other words, the highest probability det. by the NN
 
@@ -285,18 +321,25 @@ def outputMapper(output, expected):
 
     output_label = np.where(output_maxprob == output)[0] # 'where' gives the full coordinates. we just need the "x" component.
 
-    # Now we measure the success of the model via the F1 score:
-    ##
 
-    result = expected.flatten()==output_label
+    result = expected.flatten()==np.fliplr([output_label])[0]
 
     n_correct = np.count_nonzero(result)
 
     score = (float(n_correct)/m)*100
 
-
+    print "Test: Confirm output label range = "+str(np.min(output_label))+" "+str(np.max(output_label))
+    print "Test: Confirm expected label range = "+str(np.min(expected))+" "+str(np.max(expected))
     print "Score: "+str(score)+"% correct labels"
     return output_label, result, score
 
-
+np.max(a3)
 output_label, result, score = outputMapper(a3,y)
+
+
+np.fliplr([output_label])[0]
+y.flatten()
+plt.hist(output_label)
+plt.show()
+plt.hist(y)
+plt.show()
