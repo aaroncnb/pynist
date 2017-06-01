@@ -111,11 +111,10 @@ def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
 
         J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
         #J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[1:,:]**2) )*(lam/(2.0*m) ) )
-        print "Regularized"
+        print "Regularized Cost: "+str(J)
     else:
-        print "Unregularized"
+        print "Unregularized Cost: "+str(J)
 
-    print "Cost: "+str(J)
     return J, a1, a2, a3
 
 np.shape(theta1)
@@ -250,6 +249,7 @@ def costLowerer(X, y, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
         theta1 = theta1_
         theta2 = theta2_
 
+        print "Iteration #"+str(i)+" of "+str(num_iters)
         # Jplot.set_ydata(np.append(Jplot.get_ydata(),J))
         # Jplot.set_xdata(np.append(Jplot.get_xdata(),i))
         # plt.draw()
@@ -257,7 +257,7 @@ def costLowerer(X, y, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
 
     return theta1, theta2, J, a1, a2, a3
 # Test the minimizer:
-theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, lam=1, alpha = 1e-5,  num_iters=100, reg=True)
+theta1, theta2, J, a1, a2, a3 = costLowerer(X,y, nneurons = 100, lam=1, alpha = 1e-5,  num_iters=1000, reg=True)
 
 def showWeighImgs(theta1, theta2):
 
@@ -279,6 +279,7 @@ def showWeighImgs(theta1, theta2):
     fig.tight_layout()
     fig.subplots_adjust(top=0.95, bottom=0.05)
 
+    fig.savefig(ddir+"weights.pdf")
     plt.show()
 
 showWeighImgs(theta1,theta2)
