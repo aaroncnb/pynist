@@ -132,13 +132,8 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
 
     if rdm_init == True:
         ## Randomly initialize theta for symmetry-breaking:
-        #theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/10
-        #theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))/10
-        in_scale = 1 / X ** (1/2)
-        theta1 = np.random.normal(loc=0, scale = in_scale, size=(nneurons,np.size(X[0])+1)) )
-        out_scale = 1 / theta1 ** (1/2)
-        theta2 = np.random.normal(loc=0, scale = out_scale, size=(nlabels,nneurons+1)) )
-
+        theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/10
+        theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))/10
     else:
         ## Zeroes initialization
         theta1 = np.zeros((nneurons,np.size(X[0])+1))

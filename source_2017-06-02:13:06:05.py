@@ -22,9 +22,6 @@ def getMnistTrain(ddir):
     train_labels = np.reshape(train_labels,(np.size(train_labels),1))
 
     train_images = reshapeImages(train_images)
-
-    train_images = scaleData(train_images)
-
     return  train_images, train_labels
 
 
@@ -32,11 +29,6 @@ def reshapeImages(X, width=28, n_imgs=60000):
     # Given image widths and quantity, reshape into 2d array:
 
     return np.reshape(X,(n_imgs,width**2)).copy()
-
-
-def scaleData(X):
-
-    return ( X - X.mean() ) / X.std()
 
 def sigmoid(z):
 
@@ -132,13 +124,8 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
 
     if rdm_init == True:
         ## Randomly initialize theta for symmetry-breaking:
-        #theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/10
-        #theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))/10
-        in_scale = 1 / X ** (1/2)
-        theta1 = np.random.normal(loc=0, scale = in_scale, size=(nneurons,np.size(X[0])+1)) )
-        out_scale = 1 / theta1 ** (1/2)
-        theta2 = np.random.normal(loc=0, scale = out_scale, size=(nlabels,nneurons+1)) )
-
+        theta1 = np.random.standard_normal(size=(nneurons,np.size(X[0])+1))/10
+        theta2 = np.random.standard_normal(size=(nlabels,nneurons+1))/10
     else:
         ## Zeroes initialization
         theta1 = np.zeros((nneurons,np.size(X[0])+1))
