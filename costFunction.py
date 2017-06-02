@@ -222,7 +222,7 @@ def outputMapper(output, expected):
     output_label = np.where(output_maxprob == output)[0] # 'where' gives the full coordinates. we just need the "x" component.
 
 
-    result = expected.flatten()==output_label[0]
+    result = expected.flatten()==output_label
 
     n_correct = np.count_nonzero(result)
 
