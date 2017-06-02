@@ -217,11 +217,8 @@ def showWeighImgs(ddir, time, theta1, theta2):
     fig.tight_layout()
     fig.subplots_adjust(top=0.95, bottom=0.05)
     plt.show()
-    fig.savefig(ddir+"weights_"+time+".pdf")
 
-    # Plot the 'true' labels dist. against taht of the output labels:
-    ## This helps diagnose systematic errors- if score is low but distributions
-    ## have much the same shape, something is probably going wrong!
+    fig.savefig(ddir+"weights_"+time+".pdf")
 
 
 def outputMapper(output, expected):
@@ -237,10 +234,7 @@ def outputMapper(output, expected):
     # Convert output into a simple list that gives the label for each example
     ## that corresponds to the highest probability output
 
-    output_label = (output_maxprob == output) # 'where' gives the full coordinates. we just need the "x" component.
-    tmp_broad = np.arange(0,10)*np.ones((60000,10))
-    output_label = output_label.T*tmp_broad
-    output_label = np.sum(output_label, axis=1)
+    output_label = np.where(output_maxprob == output)[0] # 'where' gives the full coordinates. we just need the "x" component.
 
 
     result = expected.flatten()==output_label
@@ -259,7 +253,7 @@ def main():
         #ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
         #ddir = '/home/aaronb/Codebrary/Pytexion/Projects/pynist/data/raw/'
         ddir = '/home/aaronb/Projectbrary/pynist/data/raw/'
-        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 70, lam=1, alpha = 1e-5, num_iters=100, reg=False, rdm_init=True)
+        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=100, reg=False, rdm_init=True)
 
         return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
 
