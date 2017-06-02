@@ -168,7 +168,7 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
     plt.savefig(ddir+"J_progress_"+time+".pdf")
 
     # Show test the results against the "true" labels:
-    output, output_label, result, score = outputMapper(a3,y)
+    output_label, result, score = outputMapper(a3,y)
 
     # Show the final weights-images:
     showWeighImgs(ddir, time, theta1,theta2)
@@ -231,14 +231,14 @@ def outputMapper(output, expected):
     print "Test: Confirm output label range = "+str(np.min(output_label))+" "+str(np.max(output_label))
     print "Test: Confirm expected label range = "+str(np.min(expected))+" "+str(np.max(expected))
     print "Score: "+str(score)+"% correct labels"
-    return output, output_label, result, score
+    return output_label, result, score
 
 
 def main():
         #ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
         #ddir = '/home/aaronb/Codebrary/Pytexion/Projects/pynist/data/raw/'
         ddir = '/home/aaronb/Projectbrary/pynist/data/raw/'
-        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=10, reg=False, rdm_init=True)
+        theta1, theta2, J, a1, a2, a3, output_label, result, score = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=10, reg=False, rdm_init=True)
 
         return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
 

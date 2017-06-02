@@ -5,7 +5,6 @@ import idx2numpy
 import matplotlib.pyplot as plt
 from shutil import copyfile
 from datetime import datetime
-import pickle
 
 #import cudamat as cm
 
@@ -120,6 +119,9 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
     # Get the starting time for labeling output files:
     time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
 
+    # Copy the source code for the current run and:
+    copyfile('costFunction.py', 'source_'+time+'.py')
+
     X, y = getMnistTrain(ddir)
 
     if rdm_init == True:
@@ -163,27 +165,23 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
         iplot.append(i)
 
         plt.scatter(i,J)
-        plt.pause(0.05)
 
-    plt.savefig(ddir+"J_progress_"+time+".pdf")
+
 
     # Show test the results against the "true" labels:
-    output, output_label, result, score = outputMapper(a3,y)
+    output_label, result, score = outputMapper(a3,y)
 
     # Show the final weights-images:
-    showWeighImgs(ddir, time, theta1,theta2)
+    showWeighImgs(theta1,theta2)
 
     # Save the parameter matrices:
     with open('result_'+time+'.pickle', 'w') as f:
         pickle.dump([theta1, theta2, J, a1, a2, a3, output_label, result, score], f)
 
-    # Copy the source code for the current run and:
-    copyfile('costFunction.py', 'source_'+time+'.py')
-
-    return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
+    return theta1, theta2, J, a1, a2, a3, output_label, result, score
 
 
-def showWeighImgs(ddir, time, theta1, theta2):
+def showWeighImgs(theta1, theta2):
 
     nlabels = np.size(theta2[:,0])
 
@@ -222,7 +220,7 @@ def outputMapper(output, expected):
     output_label = np.where(output_maxprob == output)[0] # 'where' gives the full coordinates. we just need the "x" component.
 
 
-    result = expected.flatten()==output_label[0]
+    result = expected.flatten()==np.fliplr([output_label])[0]
 
     n_correct = np.count_nonzero(result)
 
@@ -231,16 +229,16 @@ def outputMapper(output, expected):
     print "Test: Confirm output label range = "+str(np.min(output_label))+" "+str(np.max(output_label))
     print "Test: Confirm expected label range = "+str(np.min(expected))+" "+str(np.max(expected))
     print "Score: "+str(score)+"% correct labels"
-    return output, output_label, result, score
+    return output_label, result, score
 
 
 def main():
         #ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
-        #ddir = '/home/aaronb/Codebrary/Pytexion/Projects/pynist/data/raw/'
+        #ddir = '/home/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
+        #ddir = '/home/aaronb/Projectbrary/python/pynist/data/raw/'
         ddir = '/home/aaronb/Projectbrary/pynist/data/raw/'
-        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=10, reg=False, rdm_init=True)
 
-        return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
+        theta1, theta2, J, a1, a2, a3, output_label, result, score = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=400, reg=False)
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()

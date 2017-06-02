@@ -238,7 +238,7 @@ def main():
         #ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
         #ddir = '/home/aaronb/Codebrary/Pytexion/Projects/pynist/data/raw/'
         ddir = '/home/aaronb/Projectbrary/pynist/data/raw/'
-        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=10, reg=False, rdm_init=True)
+        theta1, theta2, J, a1, a2, a3, output_label, result, score = costLowerer(ddir, nneurons = 50, lam=1, alpha = 1e-5, num_iters=10, reg=False, rdm_init=True)
 
         return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
 
