@@ -28,24 +28,6 @@ def getMnistTrain(ddir):
     return  train_images, train_labels
 
 
-def getMnistTest(ddir):
-
-    test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx1-ubyte")
-
-    test_images = idx2numpy.convert_from_file(ddir + "t10k-images.idx3-ubyte")
-
-    # test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx1-ubyte")
-    #
-    # test_images = idx2numpy.convert_from_file(ddir + "t10k-images.idx3-ubyte")
-    test_labels = np.reshape(test_labels,(np.size(test_labels),1))
-
-    test_images = reshapeImages(test_images, n_imgs=10000)
-
-    test_images = scaleData(test_images)
-
-    return  test_images, test_labels
-
-
 def reshapeImages(X, width=28, n_imgs=60000):
     # Given image widths and quantity, reshape into 2d array:
 
@@ -141,7 +123,7 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
     return d1, d2
 
 
-def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True, rdm_init=True, run_test=False):
+def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True, rdm_init=True):
 
     # Get the starting time for labeling output files:
     time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
@@ -212,13 +194,7 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
     # Copy the source code for the current run and:
     copyfile('costFunction.py', 'source_'+time+'.py')
 
-    if run_test == True:
-        X_test, y_test = getMnistTest(ddir)
-        forwardProp(theta1,theta2):
-
     return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
-
-
 
 
 def showWeighImgs(ddir, time, theta1, theta2):
@@ -262,7 +238,7 @@ def outputMapper(output, expected):
     ## that corresponds to the highest probability output
 
     output_label = (output_maxprob == output) # 'where' gives the full coordinates. we just need the "x" component.
-    tmp_broad = np.arange(0,10)*np.ones((m,10))
+    tmp_broad = np.arange(0,10)*np.ones((60000,10))
     output_label = output_label.T*tmp_broad
     output_label = np.sum(output_label, axis=1)
 
@@ -283,7 +259,7 @@ def main():
         #ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
         #ddir = '/home/aaronb/Codebrary/Pytexion/Projects/pynist/data/raw/'
         ddir = './data/raw/'
-        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 28, lam=1, alpha = 1e-5, num_iters=500, reg=False, rdm_init=True)
+        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 70, lam=1, alpha = 1e-5, num_iters=100, reg=False, rdm_init=True)
 
         return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
 
