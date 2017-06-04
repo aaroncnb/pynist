@@ -7,9 +7,11 @@ Running the code from within iPython is recommended (so that the figure windows 
 ```
 %run nnLabeler.py 400 28 10 0.00001 1 True
 ```
+Will run the script for 400 iterations, with 28 hidden units, assuming 10 labels (digits), a learning rate of 1e-5, lambda of 1, and with regularization.
+
 However you can also just run via `python nnLabeler.py 400 28 10 0.00001 1 True` from the command shell, and check the output .pdf plots afterwards.
 
-Will run the script for 400 iterations, with 28 hidden units, assuming 10 labels (digits), a learning rate of 1e-5, lambda of 1, and with regularization.
+Doing so, and waiting through all of the iterations, will produce terminal output looking like this:
 
 ```
 Iteration #398 of 400
@@ -25,7 +27,6 @@ Labels succesfully loaded! (As a (10000,) numpy array)
 Number of samples checked: 10000
 Score: 92.78% correct labels
 ```
-
 
 After running the code, the results-dictionary can be recovered using Pickle, to check the actual output labels, etc.:
 
