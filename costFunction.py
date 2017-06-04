@@ -154,7 +154,7 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
     return d1, d2
 
 
-def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=500, lam=1, reg=True, rdm_init=True):
+def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=500, lam=1, reg=True):
 
     # Get the starting time for labeling output files:
     time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
