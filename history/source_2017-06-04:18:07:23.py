@@ -278,9 +278,8 @@ def showHist(time, output_label,y):
         ## have much the same shape, something is probably going wrong!
 
         fig = plt.figure()
-        plt.hist(output_label,alpha=0.3, label="Predicted distribution")
-        plt.hist(y, alpha=0.3, label="Actual distribution")
-        plt.legend()
+        plt.hist(output_label,alpha=0.3)
+        plt.hist(y, alpha=0.3)
         plt.show()
         fig.savefig("./plots/resHist_"+time+".pdf")
 
@@ -316,16 +315,9 @@ def outputMapper(output, expected):
 
 def main(num_iters=sys.argv[1], nneurons=sys.argv[2], nlabels=sys.argv[3], alpha=sys.argv[4], lam=sys.argv[5], reg=sys.argv[6]):
 
+
         results = []
-
-        print "Running labeler for "+num_iters+" iterations and learning rate = "+alpha
-
-        results = nnLabeler(num_iters = int(num_iters),
-                            nneurons  = int(nneurons),
-                            nlabels   = int(nlabels),
-                            alpha     = float(alpha),
-                            lam       = float(lam),
-                            reg       = bool(lam))
+        results = nnLabeler(num_iters = int(num_iters), nneurons=int(nneurons), nlabels=int(nlabels), alpha=float(alpha), lam=float(lam),reg=bool(lam))
 
         return results
 
