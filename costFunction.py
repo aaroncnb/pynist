@@ -13,7 +13,7 @@ def readInMnistRaw(dataset='train'):
 
     # Reads in MNIST data using standard python packages:
 
-    dpath  = './data/raw/'
+    dpath  = './data/'
 
     fnames = ['train-images.idx3-ubyte',
               'train-labels.idx1-ubyte',
@@ -99,7 +99,8 @@ def forwardProp(X,theta1, theta2):
 
     return a1, a2, a3
 
-def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
+def costFunction(X, y,theta1, theta2, lam=None, reg=False):
+
     # Get the number of training examples:
     m = np.size(y)
     # Map labels to binary vectors:
@@ -179,10 +180,11 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=500, lam=1, reg=Tru
     #Begin the iterations of gradient descent- Using simple 'batch' gradient decsent
     ## SGD would perhaps be faster, but I prefer to be able to clearly see whether or not
     ## the cost is decreasing, as this is my first attempt to implenent a NN in python
+
     for i in range(0,num_iters):
 
         # Forward pass (apply activations and get the cost):
-        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=lam, reg=reg)
+        J, a1, a2, a3 = costFunction(X,y,theta1, theta2, lam=lam, reg=reg)
 
         # Reverse pass (get the gradients):
         grad1, grad2 = backProp(a1, a2, a3, theta1,theta2, y, lam=lam, reg=reg)
@@ -205,7 +207,7 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=500, lam=1, reg=Tru
         plt.pause(0.05)
 
     # Save an image of the training progress
-    plt.savefig("./Plots/J_progress_"+time+".pdf")
+    plt.savefig("./plots/J_progress_"+time+".pdf")
 
     # Show test the results against the "true" labels:
     print "Getting training set score.."
@@ -224,10 +226,10 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=500, lam=1, reg=Tru
     output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
 
     # Copy the source code for the current run and:
-    copyfile('costFunction.py', 'source_'+time+'.py')
+    copyfile('costFunction.py', './history/source_'+time+'.py')
 
     # Pickle the parameter matrices:
-    with open('result_'+time+'.pickle', 'w') as f:
+    with open('./history/result_'+time+'.pickle', 'w') as f:
         pickle.dump([theta1, theta2, output_label, score, output_label_test, result_test, score_test], f)
 
     return [theta1, theta2, output_label, score, output_label_test, result_test, score_test]
@@ -252,7 +254,7 @@ def showWeightImgs(time, theta1, theta2):
     fig.tight_layout()
     fig.subplots_adjust(top=0.95, bottom=0.05)
     plt.show()
-    fig.savefig("./Plots/weights_"+time+".pdf")
+    fig.savefig("./plots/weights_"+time+".pdf")
 
 
 
@@ -266,7 +268,7 @@ def showHist(output_label,y):
         ax.histogram(output_label)
         ax.histogram(y)
         plt.show()
-        fig.savefig("./Plots/resHist_"+time+".pdf")
+        fig.savefig("./plots/resHist_"+time+".pdf")
 
 
 
