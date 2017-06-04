@@ -1,6 +1,7 @@
 # pynist
 A simple 3-layer neural network implementation in python. 
 Inspired by Coursera Machine Learning course's excercises, which used Octave/matlab.)
+I.e., the cost function used here and the basic theory follow the equations described in that course.
 
 Running the code from within iPython is recommended (so that the figure windows stay open after the code finishes):
 
