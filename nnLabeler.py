@@ -1,13 +1,102 @@
+# For NN calculations and visualizaing progress:
 import numpy as np
+import matplotlib.pyplot as plt
+# For reading in the MNIST raw data:
+from array import array
 import struct
 import os
-import matplotlib.pyplot as plt
+# For logging the results:
+import pickle
 from shutil import copyfile
 from datetime import datetime
-import pickle
-from array import array
 
-#import cudamat as cm
+
+def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=True):
+
+    '''Function which actually runs the process start-to-finish:
+    nneurons : Number of hidden units in the model. Default is the image pixel width, 28
+    nlabels : Number of classes to be trained. Default = 10 (digits)
+    alpha : The learning rate.
+    num_iters : Number of gradient descent iterations.
+    lam : The regularization parameter, lambda.
+    reg : Whether or not regularization should be used (to avoid overfitting)'''
+
+    # Get the starting time for labeling output files:
+    time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
+
+    X, y = readInMnistRaw(dataset='train')
+
+    ## Randomly initialize theta for symmetry-breaking:
+    ### Initial value by this method seemed to be too big..
+    ### Thus I arbitrarily divided them by 10, which improves training and test results
+    ### However I admit I do not have a good explanation for doing so... it just works!
+    theta1 = np.random.normal(0, X.std(), size=(nneurons,np.size(X[0])+1))/10
+    theta2 = np.random.normal(0, theta1.std(), size=(nlabels,nneurons+1))/10
+
+    # Intialize the cost plot for visualizing convergence/non-convergence:
+    plt.axis()
+    plt.ion()
+    plt.xlim([0,num_iters])
+
+    Jplot = []
+    iplot = []
+
+    #Begin the iterations of gradient descent- Using simple 'batch' gradient decsent
+    ## SGD would perhaps be faster, but I prefer to be able to clearly see whether or not
+    ## the cost is decreasing, as this is my first attempt to implenent a NN in python
+
+    for i in range(0,num_iters):
+
+        # Forward pass (apply activations and get the cost):
+        J, a1, a2, a3 = costFunction(X,y,theta1, theta2, lam=lam, reg=reg)
+
+        # Reverse pass (get the gradients):
+        grad1, grad2 = backProp(a1, a2, a3, theta1,theta2, y, lam=lam, reg=reg)
+
+        # Take a learning-rate-sized step along the gradients:
+        ## These updates need to be simultaneous!
+        ###FUTURE WORK: Add an SGD option.
+        theta1_ = theta1 - grad1*alpha
+        theta2_ = theta2 - grad2*alpha
+
+        theta1 = theta1_
+        theta2 = theta2_
+
+        print "Iteration #"+str(i)+" of "+str(num_iters)
+
+        Jplot.append(J)
+        iplot.append(i)
+
+        plt.scatter(i,J)
+        plt.pause(0.05)
+
+    # Save an image of the training progress
+    plt.savefig("./plots/J_progress_"+time+".pdf")
+
+    # Show test the results against the "true" labels:
+    print "Getting training set score.."
+    output, output_label, result, score = outputMapper(a3,y)
+
+    # Show the final weights-images:
+    showWeightImgs(time, theta1,theta2)
+
+    # Show distributions of the expected vs. predicted labels for diagnosis:
+    showHist(output_label, y)
+
+    # Now use the model trained above on the test data, to check if it generalizes..
+    print "Calculating test-set score..."
+    X_test, y_test = readInMnistRaw(dataset='test')
+    a1_test, a2_test, a3_test = forwardProp(X_test,theta1,theta2)
+    output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
+
+    # Copy the source code for the current run and:
+    copyfile('costFunction.py', './history/source_'+time+'.py')
+
+    # Pickle the parameter matrices:
+    with open('./history/result_'+time+'.pickle', 'w') as f:
+        pickle.dump([theta1, theta2, output_label, score, output_label_test, result_test, score_test], f)
+
+    return [theta1, theta2, output_label, score, output_label_test, result_test, score_test]
 
 def readInMnistRaw(dataset='train'):
 
@@ -155,85 +244,6 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
     return d1, d2
 
 
-def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=500, lam=1, reg=True):
-
-    # Get the starting time for labeling output files:
-    time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
-
-    X, y = readInMnistRaw(dataset='train')
-
-    ## Randomly initialize theta for symmetry-breaking:
-    ### Initial value by this method seemed to be too big..
-    ### Thus I arbitrarily divided them by 10, which improves training and test results
-    ### However I admit I do not have a good explanation for doing so... it just works!
-    theta1 = np.random.normal(0, X.std(), size=(nneurons,np.size(X[0])+1))/10
-    theta2 = np.random.normal(0, theta1.std(), size=(nlabels,nneurons+1))/10
-
-    # Intialize the cost plot for visualizing convergence/non-convergence:
-    plt.axis()
-    plt.ion()
-    plt.xlim([0,num_iters])
-
-    Jplot = []
-    iplot = []
-
-    #Begin the iterations of gradient descent- Using simple 'batch' gradient decsent
-    ## SGD would perhaps be faster, but I prefer to be able to clearly see whether or not
-    ## the cost is decreasing, as this is my first attempt to implenent a NN in python
-
-    for i in range(0,num_iters):
-
-        # Forward pass (apply activations and get the cost):
-        J, a1, a2, a3 = costFunction(X,y,theta1, theta2, lam=lam, reg=reg)
-
-        # Reverse pass (get the gradients):
-        grad1, grad2 = backProp(a1, a2, a3, theta1,theta2, y, lam=lam, reg=reg)
-
-        # Take a learning-rate-sized step along the gradients:
-        ## These updates need to be simultaneous!
-        ###FUTURE WORK: Add an SGD option.
-        theta1_ = theta1 - grad1*alpha
-        theta2_ = theta2 - grad2*alpha
-
-        theta1 = theta1_
-        theta2 = theta2_
-
-        print "Iteration #"+str(i)+" of "+str(num_iters)
-
-        Jplot.append(J)
-        iplot.append(i)
-
-        plt.scatter(i,J)
-        plt.pause(0.05)
-
-    # Save an image of the training progress
-    plt.savefig("./plots/J_progress_"+time+".pdf")
-
-    # Show test the results against the "true" labels:
-    print "Getting training set score.."
-    output, output_label, result, score = outputMapper(a3,y)
-
-    # Show the final weights-images:
-    showWeightImgs(time, theta1,theta2)
-
-    # Show distributions of the expected vs. predicted labels for diagnosis:
-    showHist(output_label, y)
-
-    # Now use the model trained above on the test data, to check if it generalizes..
-    print "Calculating test-set score..."
-    X_test, y_test = readInMnistRaw(dataset='test')
-    a1_test, a2_test, a3_test = forwardProp(X_test,theta1,theta2)
-    output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
-
-    # Copy the source code for the current run and:
-    copyfile('costFunction.py', './history/source_'+time+'.py')
-
-    # Pickle the parameter matrices:
-    with open('./history/result_'+time+'.pickle', 'w') as f:
-        pickle.dump([theta1, theta2, output_label, score, output_label_test, result_test, score_test], f)
-
-    return [theta1, theta2, output_label, score, output_label_test, result_test, score_test]
-
 def showWeightImgs(time, theta1, theta2):
 
     nlabels = np.size(theta2[:,0])
@@ -256,8 +266,6 @@ def showWeightImgs(time, theta1, theta2):
     plt.show()
     fig.savefig("./plots/weights_"+time+".pdf")
 
-
-
 def showHist(output_label,y):
 
         # Plot the 'true' labels dist. against taht of the output labels:
@@ -269,9 +277,6 @@ def showHist(output_label,y):
         ax.histogram(y)
         plt.show()
         fig.savefig("./plots/resHist_"+time+".pdf")
-
-
-
 
 def outputMapper(output, expected):
 
@@ -303,11 +308,10 @@ def outputMapper(output, expected):
 
     return output, output_label, result, score
 
-
 def main():
 
         results = []
-        results = cf.costFunction(nneurons = 50, lam=1, alpha = 1e-5, num_iters=400, reg=False)
+        results = nnLabeler()
 
         return results
 
