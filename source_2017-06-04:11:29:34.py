@@ -40,16 +40,16 @@ def readInMnistRaw(dataset='train'):
 
     # Load-in the image data the file objects and process them into numpy arrays:
     ## Note:: This will load each image as a single 'flattened' row, not matrix!!!
-    index, n_imgs, n_rows, n_cols = struct.unpack(">IIII", file_img.read(16))
+    magic, size, n_rows, n_cols = struct.unpack(">IIII", file_img.read(16))
 
     image_data = array("B", file_img.read())
 
     images = []
 
-    for i in range(n_imgs):
+    for i in range(size):
         images.append([0] * n_rows * n_cols)
 
-    for i in range(n_imgs):
+    for i in range(size):
         images[i][:] = image_data[i * n_rows * n_cols:(i + 1) * n_rows * n_cols]
 
     images = np.array(images)
@@ -57,7 +57,7 @@ def readInMnistRaw(dataset='train'):
     print "Images succesfully loaded! (As a "+str(np.shape(images))+" numpy array)"
 
     # Load the labels in and convert to a numpy array:
-    index, n_imgs = struct.unpack(">II", file_lbl.read(8))
+    magic, size = struct.unpack(">II", file_lbl.read(8))
     labels = array("B", file_lbl.read())
     labels = np.array(labels)
     print "Labels succesfully loaded! (As a "+str(np.shape(labels))+" numpy array)"
@@ -201,7 +201,7 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
     return d1, d2
 
 
-def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True, rdm_init=True, run_test=True):
+def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True, rdm_init=True, run_test=False):
 
     # Get the starting time for labeling output files:
     time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
@@ -257,17 +257,10 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
     plt.savefig(ddir+"J_progress_"+time+".pdf")
 
     # Show test the results against the "true" labels:
-    print "Getting training set score.."
     output, output_label, result, score = outputMapper(a3,y)
 
     # Show the final weights-images:
     showWeightImgs(ddir, time, theta1,theta2)
-
-    if run_test == True:
-        print "Calculating test-set score..."
-        X_test, y_test = readInMnistRaw(dataset='test')
-        a1_test, a2_test, a3_test = forwardProp(X_test,theta1,theta2)
-        output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
 
     # Save the parameter matrices:
     with open('result_'+time+'.pickle', 'w') as f:
@@ -275,6 +268,12 @@ def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1
 
     # Copy the source code for the current run and:
     copyfile('costFunction.py', 'source_'+time+'.py')
+
+    if run_test == True:
+        print "Calculating test-set score..."
+        X_test, y_test = readInMnistRaw(dataset=='test')
+        a1_test, a2_test, a3_test = forwardProp(X_test,theta1,theta2)
+        output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
 
     return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
 
