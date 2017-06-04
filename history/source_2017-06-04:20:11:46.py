@@ -9,7 +9,6 @@ import os
 import pickle
 from shutil import copyfile
 from datetime import datetime
-# For running from the command line
 import sys
 
 
@@ -94,21 +93,11 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=Tru
     # Copy the source code for the current run and:
     copyfile('nnLabeler.py', './history/source_'+time+'.py')
 
-    # Arrange the results into a dictionary:
-    results =  {'theta1':theta1,
-                'theta2':theta2,
-                'output_label':output_label,
-                'score': score,
-                'outout_label_test': output_label_test,
-                'result': result_test,
-                'score_test' : score_test}
+    # Pickle the parameter matrices:
+    with open('./history/result_'+time+'.pickle', 'w') as f:
+        pickle.dump([theta1, theta2, output_label, score, output_label_test, result_test, score_test], f)
 
-
-    # Pickle the dictionary for later inspection:
-    with open('./history/result_'+time+'.p', 'w') as f:
-        pickle.dump(results, f)
-
-    return results
+    return [theta1, theta2, output_label, score, output_label_test, result_test, score_test]
 
 def readInMnistRaw(dataset='train',scale=True):
 

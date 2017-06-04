@@ -1,120 +1,20 @@
-# For NN calculations and visualizaing progress:
 import numpy as np
-import matplotlib.pyplot as plt
-# For reading in the MNIST raw data:
-from array import array
 import struct
 import os
-# For logging the results:
-import pickle
+#import idx2numpy
+import matplotlib.pyplot as plt
 from shutil import copyfile
 from datetime import datetime
-# For running from the command line
-import sys
+import pickle
+from array import array
 
-
-def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=True):
-
-    '''Function which actually runs the process start-to-finish:
-    nneurons : Number of hidden units in the model. Default is the image pixel width, 28
-    nlabels : Number of classes to be trained. Default = 10 (digits)
-    alpha : The learning rate.
-    num_iters : Number of gradient descent iterations.
-    lam : The regularization parameter, lambda.
-    reg : Whether or not regularization should be used (to avoid overfitting)'''
-
-    # Get the starting time for labeling output files:
-    time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
-
-    X, y = readInMnistRaw(dataset='train',scale=True)
-
-    ## Randomly initialize theta for symmetry-breaking:
-    ### Initial value by this method seemed to be too big..
-    ### Thus I arbitrarily divided them by 10, which improves training and test results
-    ### However I admit I do not have a good explanation for doing so... it just works!
-    theta1 = np.random.normal(0, X.std(), size=(nneurons,np.size(X[0])+1))/10
-    theta2 = np.random.normal(0, theta1.std(), size=(nlabels,nneurons+1))/10
-
-    # Intialize the cost plot for visualizing convergence/non-convergence:
-    plt.axis()
-    plt.ion()
-    plt.xlim([0,num_iters])
-
-    Jplot = []
-    iplot = []
-
-    #Begin the iterations of gradient descent- Using simple 'batch' gradient decsent
-    ## SGD would perhaps be faster, but I prefer to be able to clearly see whether or not
-    ## the cost is decreasing, as this is my first attempt to implenent a NN in python
-
-    for i in range(0,num_iters):
-
-        # Forward pass (apply activations and get the cost):
-        J, a1, a2, a3 = costFunction(X,y,theta1, theta2, lam=lam, reg=reg)
-
-        # Reverse pass (get the gradients):
-        grad1, grad2 = backProp(a1, a2, a3, theta1,theta2, y, lam=lam, reg=reg)
-
-        # Take a learning-rate-sized step along the gradients:
-        ## These updates need to be simultaneous!
-        ###FUTURE WORK: Add an SGD option.
-        theta1_ = theta1 - grad1*alpha
-        theta2_ = theta2 - grad2*alpha
-
-        theta1 = theta1_
-        theta2 = theta2_
-
-        print "Iteration #"+str(i)+" of "+str(num_iters)
-
-        Jplot.append(J)
-        iplot.append(i)
-
-        plt.scatter(i,J)
-        plt.pause(0.05)
-
-    # Save an image of the training progress
-    plt.savefig("./plots/J_progress_"+time+".pdf")
-
-    # Show test the results against the "true" labels:
-    print "Getting training set score.."
-    output, output_label, result, score = outputMapper(a3,y)
-
-    # Show the final weights-images:
-    showWeightImgs(time, theta1,theta2)
-
-    # Show distributions of the expected vs. predicted labels for diagnosis:
-    showHist(time, output_label, y)
-
-    # Now use the model trained above on the test data, to check if it generalizes..
-    print "Calculating test-set score..."
-    X_test, y_test = readInMnistRaw(dataset='test')
-    a1_test, a2_test, a3_test = forwardProp(X_test,theta1,theta2)
-    output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
-
-    # Copy the source code for the current run and:
-    copyfile('nnLabeler.py', './history/source_'+time+'.py')
-
-    # Arrange the results into a dictionary:
-    results =  {'theta1':theta1,
-                'theta2':theta2,
-                'output_label':output_label,
-                'score': score,
-                'outout_label_test': output_label_test,
-                'result': result_test,
-                'score_test' : score_test}
-
-
-    # Pickle the dictionary for later inspection:
-    with open('./history/result_'+time+'.p', 'w') as f:
-        pickle.dump(results, f)
-
-    return results
+#import cudamat as cm
 
 def readInMnistRaw(dataset='train',scale=True):
 
     # Reads in MNIST data using standard python packages:
 
-    dpath  = './data/'
+    dpath  = './data/raw/'
 
     fnames = ['train-images.idx3-ubyte',
               'train-labels.idx1-ubyte',
@@ -162,14 +62,57 @@ def readInMnistRaw(dataset='train',scale=True):
     labels = np.array(labels)
     print "Labels succesfully loaded! (As a "+str(np.shape(labels))+" numpy array)"
 
-    # Standardize the data to improve performance:
-    if scale==True:
+    if scale == True:
         images = scaleData(images)
 
     return images, labels
 
-def scaleData(X):
+# def getMnistTrain(ddir):
+#
+#     '''Reads in data using a third-party package:
+#     ### Used temporarily for testing purposes.
+#     ### The code now reads in the data using only standard packages,
+#     ### via the 'readInMnistRaw' function, above.'''
+#
+#     train_labels = idx2numpy.convert_from_file(ddir + "train-labels.idx1-ubyte")
+#
+#     train_images = idx2numpy.convert_from_file(ddir + "train-images.idx3-ubyte")
+#
+#     # test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx1-ubyte")
+#     #
+#     # test_images = idx2numpy.convert_from_file(ddir + "t10k-images.idx3-ubyte")
+#     train_labels = np.reshape(train_labels,(np.size(train_labels),1))
+#
+#     train_images = reshapeImages(train_images)
+#
+#     train_images = scaleData(train_images)
+#
+#     return  train_images, train_labels
+#
+#
+# def getMnistTest(ddir):
+#
+#     test_labels = idx2numpy.convert_from_file(ddir + "t10k-labels.idx1-ubyte")
+#
+#     test_images = idx2numpy.convert_from_file(ddir + "t10k-images.idx3-ubyte")
+#
+#     test_labels = np.reshape(test_labels,(np.size(test_labels),1))
+#
+#     test_images = reshapeImages(test_images, n_imgs=10000)
+#
+#     test_images = scaleData(test_images)
+#
+#     return  test_images, test_labels
 
+
+def reshapeImages(X, width=28, n_imgs=60000):
+    '''     Given image widths and quantity, reshape into 2d array
+    This function is not needed if reading in
+    raw MNIST data using 'readInMnistRaw' '''
+    return np.reshape(X,(n_imgs,width**2)).copy()
+
+def scaleData(X):
+    print "Input Data values range: "+str(X.max()-X.min())
     return ( X - X.mean() ) / X.std()
 
 def sigmoid(z):
@@ -189,6 +132,7 @@ def binaryMapper(y, nlabels=10):
     # Map labels to binary label vectors
     y_temp    = np.arange(0,nlabels)
     y_broad   = np.ones((np.size(y),nlabels))
+    #y_bool    =
 
     return np.array(y*y_broad==y_temp, dtype=int)
 
@@ -204,8 +148,7 @@ def forwardProp(X,theta1, theta2):
 
     return a1, a2, a3
 
-def costFunction(X, y,theta1, theta2, lam=None, reg=False):
-
+def costFunctionNe(X, y,theta1, theta2, lam=None, reg=False):
     # Get the number of training examples:
     m = np.size(y)
     # Map labels to binary vectors:
@@ -218,7 +161,7 @@ def costFunction(X, y,theta1, theta2, lam=None, reg=False):
         -(np.log(a3)*y)-(np.log(1-a3)*(1-y))
                                     ) /m
 
-    # Add-regularization penalties to the cost (excluding the bias ):
+    # with regularization:
     if reg==True:
 
         J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
@@ -260,7 +203,84 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
     return d1, d2
 
 
-def showWeightImgs(time, theta1, theta2):
+def costLowerer(ddir, nneurons=100, nlabels=10, alpha=0.001, num_iters=10, lam=1, reg=True, rdm_init=True):
+
+    # Get the starting time for labeling output files:
+    time = datetime.now().strftime('%Y-%m-%d:%H:%M:%S')
+
+    #X, y = getMnistTrain(ddir)
+    X, y = readInMnistRaw(dataset='train')
+
+    if rdm_init == True:
+        ## Randomly initialize theta for symmetry-breaking:
+        theta1 = np.random.normal(0, X.std(), size=(nneurons,np.size(X[0])+1))
+        theta2 = np.random.normal(0, theta1.std(), size=(nlabels,nneurons+1))
+
+    else:
+        ## Zeroes initialization:
+        ## Random is preferred- this option kept for comparison purposes.
+        theta1 = np.zeros((nneurons,np.size(X[0])+1))
+        theta2 = np.zeros((nlabels,nneurons+1))
+
+    # Intialize the cost plot for visualizing convergence/non-convergence:
+    plt.axis()
+    plt.ion()
+    plt.xlim([0,num_iters])
+
+    Jplot = []
+    iplot = []
+
+    for i in range(0,num_iters):
+
+        # Forward pass (apply activations and get the cost):
+        J, a1, a2, a3 = costFunctionNe(X,y,theta1, theta2, lam=lam, reg=reg)
+
+        # Reverse pass (get the gradients):
+        grad1, grad2 = backProp(a1, a2, a3, theta1,theta2, y, lam=lam, reg=reg)
+
+        # Take a learning-rate-sized step along the gradients:
+        ## These updates need to be simultaneous!
+        ###FUTURE WORK: Add an SGD option.
+        theta1_ = theta1 - grad1*alpha
+        theta2_ = theta2 - grad2*alpha
+
+        theta1 = theta1_
+        theta2 = theta2_
+
+        print "Iteration #"+str(i)+" of "+str(num_iters)
+
+        Jplot.append(J)
+        iplot.append(i)
+
+        plt.scatter(i,J)
+        plt.pause(0.05)
+
+    # Save an image of the training progress
+    plt.savefig(ddir+"J_progress_"+time+".pdf")
+
+    # Show test the results against the "true" labels:
+    print "Getting training set score.."
+    output, output_label, result, score = outputMapper(a3,y)
+
+    # Show the final weights-images:
+    showWeightImgs(ddir, time, theta1,theta2)
+
+    # Get the test-set score:
+    print "Calculating test-set score..."
+    X_test, y_test = readInMnistRaw(dataset='test')
+    a1_test, a2_test, a3_test = forwardProp(X_test,theta1,theta2)
+    output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
+
+    # Save the parameter matrices:
+    with open('result_'+time+'.pickle', 'w') as f:
+        pickle.dump([theta1, theta2, J, a1, a2, a3, output_label, result, score], f)
+
+    # Copy the source code for the current run and:
+    copyfile('costFunction.py', 'source_'+time+'.py')
+
+    return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
+
+def showWeightImgs(ddir, time, theta1, theta2):
 
     nlabels = np.size(theta2[:,0])
 
@@ -280,20 +300,12 @@ def showWeightImgs(time, theta1, theta2):
     fig.tight_layout()
     fig.subplots_adjust(top=0.95, bottom=0.05)
     plt.show()
-    fig.savefig("./plots/weights_"+time+".pdf")
+    fig.savefig(ddir+"weights_"+time+".pdf")
 
-def showHist(time, output_label,y):
+    # Plot the 'true' labels dist. against taht of the output labels:
+    ## This helps diagnose systematic errors- if score is low but distributions
+    ## have much the same shape, something is probably going wrong!
 
-        # Plot the 'true' labels dist. against taht of the output labels:
-        ## This helps diagnose systematic errors- if score is low but distributions
-        ## have much the same shape, something is probably going wrong!
-
-        fig = plt.figure()
-        plt.hist(output_label,alpha=0.3, label="Predicted distribution")
-        plt.hist(y, alpha=0.3, label="Actual distribution")
-        plt.legend()
-        plt.show()
-        fig.savefig("./plots/resHist_"+time+".pdf")
 
 def outputMapper(output, expected):
 
@@ -325,21 +337,14 @@ def outputMapper(output, expected):
 
     return output, output_label, result, score
 
-def main(num_iters=sys.argv[1], nneurons=sys.argv[2], nlabels=sys.argv[3], alpha=sys.argv[4], lam=sys.argv[5], reg=sys.argv[6]):
 
-        results = []
+def main():
+        #ddir = '/work1/users/aaronb/Codebrary/Python/Projects/pynist/data/raw/'
+        #ddir = '/home/aaronb/Codebrary/Pytexion/Projects/pynist/data/raw/'
+        ddir = './data/raw/'
+        theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output = costLowerer(ddir, nneurons = 25, lam=1, alpha = 1e-5, num_iters=1000, reg=True, rdm_init=True)
 
-        print "Running labeler for "+num_iters+" iterations and learning rate = "+alpha
+        return theta1, theta2, J, a1, a2, a3, output_label, result, score, X, y, output
 
-        results = nnLabeler(num_iters = int(num_iters),
-                            nneurons  = int(nneurons),
-                            nlabels   = int(nlabels),
-                            alpha     = float(alpha),
-                            lam       = float(lam),
-                            reg       = bool(lam))
-
-        return results
-
-if __name__ == '__main__':
-
-    results = main()
+# if __name__ == '__main__':
+#     main()
