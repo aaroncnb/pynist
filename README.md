@@ -46,7 +46,7 @@ The contents of the pickle are in the form of a dictionary `results`, as follows
                 'outout_label_test': output_label_test,
                 'result': result_test,
                 'score_test' : score_test}
-                ```
+```                
 
 Pickle files are saved after a successful run, with timestamp of the run. So just choose the '.p' file with the most recent timestamp, if you just ran the code.
 The source code for each run is also copied (with the same timestamp) so that results are always accompanied by the code that generated them. 
