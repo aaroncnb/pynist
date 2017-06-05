@@ -55,7 +55,7 @@ Plots are stored in `./plots/*.pdf` also with a timestamp.
 
 After downloading the raw MNIST training and test data, 'nnLabeler' allows for a simple batch gradient descent
 optimization (with the cost given by 'costFunction' after forward feeding with 'forwardProp') of the neural network hidden layer weights, `theta1` and `theta2`,
-along their respective gradients (determined by back-propagation, using 'backProp').
+along their respective gradients (determined by back-propagation, using `backProp()`).
 
 The input data is standardized to improve the optimization process, from its original range of 0-255.
 
@@ -65,16 +65,22 @@ be applied to the test data to determine a cross-test score.
 Using the code as written, applying regularzation with a lambda of 1.0, a learning rate of 1e-5, and for 400
 iterations of batch gradient descent, you may find an accuracy of about ~92% for training and cross-testing:
 
-The profile of cost vs. iteration is saved in `plots/J_progress_[timestamp].pdf`
+The profile of cost vs. iteration is saved in `plots/J_progress_[timestamp].pdf`:
+![Cost drops rapidly at first, and gradually decreases to convergence. Training performance could be improved with an adaptive learning rate, but this works for now](https://github.com/aaroncnb/pynist/blob/master/J_progress_ex.png?raw=true)
+
 
 The code will print the cost for each iteration, as well as live-plot the cost vs. iteration number. After training,
-the weights (reconstructed form 'theta1' and 'theta2', and shaped into the original image dimensions) will be displayed (and saved as 
+the weights (reconstructed form `theta1` and `theta2`, and shaped into the original image dimensions) will be displayed (and saved as 
 `plots/weights_[timestamp].pdf`
-This will show how well the model is able to "understand" what the digits in the dataset look like. 
+This will show how well the model is able to "understand" what the digits in the dataset look like:
+
+![Weights images after 400 iterations. 0-3 look OK, but as for the others..?](https://github.com/aaroncnb/pynist/blob/master/weights_ex.png?raw=true)
 
 Also, histograms (`plots/resHist_[timestamp].pdf`) of both the modeled labels and the actual labels will be plotted. This is mainly just for diagnostic purposes
 if bugs are encountered, or to use for future improvements of the code. You can quicky see from such a plot which labels
-have large discrepancies.
+have large discrepancies:
+
+![This kind of plot is helpful if you make revisions to the code and you suspect a bug is causing systematic issues.](https://github.com/aaroncnb/pynist/blob/master/resHist_ex.png?raw=true)
 
 
 # GPU Version:
