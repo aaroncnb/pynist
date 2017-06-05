@@ -75,3 +75,18 @@ This will show how well the model is able to "understand" what the digits in the
 Also, histograms (`plots/resHist_[timestamp].pdf`) of both the modeled labels and the actual labels will be plotted. This is mainly just for diagnostic purposes
 if bugs are encountered, or to use for future improvements of the code. You can quicky see from such a plot which labels
 have large discrepancies.
+
+
+# GPU Version:
+
+I have since added a GPU-enabled version of `nnLabeler.py`, named simply `nnLabeler_GPU.py`. Basically, it works exactly
+the same as the original code, but relies on `gnumpy` instead of `numpy` for matrix operations. `gnumpy` runs on the GPU rather than the CPU. This affords a huge performance increase however, it also adds a significant overhead cost- because
+you have to take the time to install and setup `gnumpy` and `cudamat` as well as their dependencies. Also, the GPU version is completely useless if you are not using an NVIDIA GPU. Peformance improvements will of course also depend on your GPU specs. I found about a 20x imrovement using an nVidia GTX 1070 vs. a quad-core Intel i7 (even with multi-core numpy).
+
+There is no change in the learning algorithm between the CPU and GPU versions, just in how the matrix operations are executed.
+
+Info for `nnLabeler_GPU.py` dependencies:
+`gnumpy` : http://www.cs.toronto.edu/~tijmen/gnumpy.html   (Installable via pip install gnumpy)
+`cudamat` : https://github.com/cudamat/cudamat (Installable via pip, but you must first clone the respository)
+
+`cudamat` itself then requires the CUDA developer kit : https://developer.nvidia.com/cuda-downloads
