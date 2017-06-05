@@ -11,8 +11,6 @@ from shutil import copyfile
 from datetime import datetime
 # For running from the command line
 import sys
-# For GPU-enabled processing:
-import gnumpy as gpu
 
 
 def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=True):
@@ -36,11 +34,6 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=Tru
     ### However I admit I do not have a good explanation for doing so... it just works!
     theta1 = np.random.normal(0, X.std(), size=(nneurons,np.size(X[0])+1))/10
     theta2 = np.random.normal(0, theta1.std(), size=(nlabels,nneurons+1))/10
-
-    # Put intput matrices into gnumpy arrays for GPU-enabled calculation:
-    X      = gpu.garray(X)
-    theta1 = gpu.garray(theta1)
-    theta2 = gpu.garray(theta2)
 
     # Intialize the cost plot for visualizing convergence/non-convergence:
     plt.axis()
@@ -80,7 +73,7 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=Tru
         plt.pause(0.05)
 
     # Save an image of the training progress
-    plt.savefig("./plots/GPU_J_progress_"+time+".pdf")
+    plt.savefig("./plots/J_progress_"+time+".pdf")
 
     # Show test the results against the "true" labels:
     print "Getting training set score.."
@@ -99,7 +92,7 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=Tru
     output_test, output_label_test, result_test, score_test = outputMapper(a3_test, y_test)
 
     # Copy the source code for the current run and:
-    copyfile('nnLabeler.py', './history/GPU_source_'+time+'.py')
+    copyfile('nnLabeler.py', './history/source_'+time+'.py')
 
     # Arrange the results into a dictionary:
     results =  {'theta1':theta1,
@@ -112,7 +105,7 @@ def nnLabeler(nneurons=28, nlabels=10, alpha=1e-5, num_iters=400, lam=1, reg=Tru
 
 
     # Pickle the dictionary for later inspection:
-    with open('./history/GPU_result_'+time+'.p', 'w') as f:
+    with open('./history/result_'+time+'.p', 'w') as f:
         pickle.dump(results, f)
 
     return results
@@ -181,7 +174,7 @@ def scaleData(X):
 
 def sigmoid(z):
 
-    return 1 / (1 + gpu.exp(-z))
+    return 1 / (1 + np.exp(-z))
 
 def sigmoidGrad(z):
 
@@ -201,10 +194,11 @@ def binaryMapper(y, nlabels=10):
 
 def forwardProp(X,theta1, theta2):
 
-    a1 = gpu.concatenate( (X, gpu.ones((np.size(X[:,0]),1)) ), axis=1)
+    a1 = np.insert(X,0,1, axis=1)
 
-    a2 = sigmoid(theta1.dot(a1.T))
-    a2 = gpu.concatenate( (a2, gpu.ones((1, np.size(a2[0,:])) ) ), axis=0)
+    a2 = np.insert(
+        sigmoid(theta1.dot(a1.T)),
+                    0,1, axis=0)
 
     a3 = sigmoid(theta2.dot(a2))
 
@@ -215,19 +209,19 @@ def costFunction(X, y,theta1, theta2, lam=None, reg=False):
     # Get the number of training examples:
     m = np.size(y)
     # Map labels to binary vectors:
-    y = gpu.garray(binaryMapper(y)).T
+    y = binaryMapper(y).T
     # Feed it forward:
     a1, a2, a3 = forwardProp(X, theta1, theta2)
 
     # Get the cost without regularization:
-    J = gpu.sum(
-        -(gpu.log(a3)*y)-(gpu.log(1-a3)*(1-y))
+    J = np.sum(
+        -(np.log(a3)*y)-(np.log(1-a3)*(1-y))
                                     ) /m
 
     # Add-regularization penalties to the cost (excluding the bias ):
     if reg==True:
 
-        J += ( ( gpu.sum(theta1[:,1:]**2) + gpu.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
+        J += ( ( np.sum(theta1[:,1:]**2) + np.sum(theta2[:,1:]**2) )*(lam/(2.0*m) ) )
 
         print "Regularized Cost: "+str(J)
     else:
@@ -245,7 +239,7 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
 
     # The difference between expected and output values:
     ### (Input labels are mapped to binary vectors)
-    s3 = a3 - gpu.garray(binaryMapper(y).T)
+    s3 = a3 - binaryMapper(y).T
 
     # The second backprop layer: Applying the activation function's derivative:
     s2 = theta2.T.dot(s3)[1:]*sigmoidGrad(theta1.dot(a1.T))
@@ -267,6 +261,7 @@ def backProp(a1, a2, a3, theta1, theta2, y, reg=True, lam=1):
 
 
 def showWeightImgs(time, theta1, theta2):
+
     nlabels = np.size(theta2[:,0])
 
     filters = theta2[:,1:].dot(theta1[:,1:])
@@ -277,7 +272,7 @@ def showWeightImgs(time, theta1, theta2):
 
         ax = fig.add_subplot(2,5,lbl+1)
 
-        ax.imshow(filters.as_numpy_array().reshape(10,28,28)[lbl])
+        ax.imshow(filters.reshape(10,28,28)[lbl])
 
         aspect = abs(ax.get_xlim()[1] - ax.get_xlim()[0]) / abs(ax.get_ylim()[1] - ax.get_ylim()[0])
         ax.set_aspect(aspect)
@@ -285,7 +280,7 @@ def showWeightImgs(time, theta1, theta2):
     fig.tight_layout()
     fig.subplots_adjust(top=0.95, bottom=0.05)
     plt.show()
-    fig.savefig("./plots/GPU_weights_"+time+".pdf")
+    fig.savefig("./plots/weights_"+time+".pdf")
 
 def showHist(time, output_label,y):
 
@@ -298,7 +293,7 @@ def showHist(time, output_label,y):
         plt.hist(y, alpha=0.3, label="Actual distribution")
         plt.legend()
         plt.show()
-        fig.savefig("./plots/GPU_resHist_"+time+".pdf")
+        fig.savefig("./plots/resHist_"+time+".pdf")
 
 def outputMapper(output, expected):
 
@@ -308,13 +303,12 @@ def outputMapper(output, expected):
     # Take just the elements on each row with the highest value:
     ## In other words, the highest probability det. by the NN
 
-    output_maxprob = np.max(output.as_numpy_array(), axis=0)
-    print "Output maxprob: "+str(output_maxprob)
+    output_maxprob = np.max(output, axis=0)
 
     # Convert output into a simple list that gives the label for each example
     ## that corresponds to the highest probability output
 
-    output_label = (output_maxprob == output.as_numpy_array()) # 'where' gives the full coordinates. we just need the "x" component.
+    output_label = (output_maxprob == output) # 'where' gives the full coordinates. we just need the "x" component.
     tmp_broad = np.arange(0,10)*np.ones((m,10))
     output_label = output_label.T*tmp_broad
     output_label = np.sum(output_label, axis=1)
@@ -325,10 +319,9 @@ def outputMapper(output, expected):
 
     score = (float(n_correct)/m)*100
 
-    print "Test: Confirm output label range = "+str(np.min(output_label))+" "+str(np.max(output_label))
-    print "Test: Confirm expected label range = "+str(np.min(expected))+" "+str(np.max(expected))
+    #print "Test: Confirm output label range = "+str(np.min(output_label))+" "+str(np.max(output_label))
+    #print "Test: Confirm expected label range = "+str(np.min(expected))+" "+str(np.max(expected))
     print "Score: "+str(score)+"% correct labels"
-
 
     return output, output_label, result, score
 
